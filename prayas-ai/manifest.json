@@ -1,0 +1,17 @@
+{
+  "name": "Prayas AI \u2014 \u0916\u0947\u0924\u0940 \u0938\u093e\u0925\u0940",
+  "short_name": "Prayas AI",
+  "description": "Voice-first, community-powered farming assistant: crop disease alerts, live risk map, and mandi prices.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAF6EA",
+  "theme_color": "#1B4332",
+  "lang": "hi-IN",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}
