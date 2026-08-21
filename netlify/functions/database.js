@@ -1,4 +1,5 @@
-const fetch = require('node-fetch') || globalThis.fetch;
+// Using global fetch (native in Node 18+)
+
 
 // Ephemeral in-memory fallback for local demos
 let fallbackStore = {
