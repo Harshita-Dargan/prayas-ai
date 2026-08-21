@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Prayas AI — खेती साथी</title>
-<meta name="description" content="Voice-first, community-powered farming assistant">
+<meta name="description" content="Voice-first, community-powered farming assistant for early crop disease detection">
 <meta name="theme-color" content="#1B4332">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -93,16 +93,17 @@ img{max-width:100%;display:block;}
 .hero{
   margin-top:-34px; background:#fff; border-radius:24px; box-shadow:var(--shadow);
   padding:26px 20px 22px; text-align:center; border:1px solid var(--line);
+  position:relative; z-index:10;
 }
 .hero-label{font-size:13px; color:var(--ink-soft); font-weight:600; margin-bottom:14px;}
-.mic-wrap{position:relative; width:132px; height:132px; margin:0 auto 14px;}
+.mic-wrap{position:relative; width:120px; height:120px; margin:0 auto 10px;}
 .mic-ring{position:absolute; inset:0; border-radius:50%; border:2px solid var(--leaf-light);}
-.mic-ring.r2{inset:-14px; opacity:.55;}
-.mic-ring.r3{inset:-28px; opacity:.3;}
+.mic-ring.r2{inset:-12px; opacity:.55;}
+.mic-ring.r3{inset:-24px; opacity:.3;}
 .mic-btn{
-  position:absolute; inset:14px; border-radius:50%; border:none; cursor:pointer;
+  position:absolute; inset:12px; border-radius:50%; border:none; cursor:pointer;
   background:linear-gradient(160deg,var(--leaf),var(--forest));
-  color:#fff; font-size:40px; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:38px; display:flex; align-items:center; justify-content:center;
   box-shadow:0 14px 28px -10px rgba(27,67,50,.55);
   transition:transform .15s ease;
 }
@@ -178,6 +179,7 @@ img{max-width:100%;display:block;}
 .conf-badge{font-size:12px; font-weight:800; padding:5px 10px; border-radius:999px;}
 .conf-badge.high{background:#FBE4E0; color:var(--red);}
 .conf-badge.med{background:#FCEBD9; color:var(--turmeric-deep);}
+.conf-badge.low{background:#E8ECFB; color:#3B4C9C;}
 .advice-box{margin-top:12px; background:var(--paper-dim); border-radius:12px; padding:12px; font-size:13.5px; line-height:1.55;}
 .result-actions{display:flex; gap:10px; margin-top:14px;}
 
@@ -210,17 +212,18 @@ img{max-width:100%;display:block;}
 .wa-avatar{width:36px;height:36px;border-radius:50%; background:var(--forest); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px;}
 .wa-title{font-weight:700; font-size:14px;}
 .wa-sub{font-size:11.5px; color:var(--ink-soft);}
+.wa-thread{max-height:280px; overflow-y:auto; padding-right:4px;}
 .wa-bubble{max-width:82%; padding:9px 12px; border-radius:14px; font-size:13.5px; margin-bottom:8px; line-height:1.4;}
 .wa-in{background:#fff; border-bottom-left-radius:4px;}
 .wa-out{background:#DFF4E2; margin-left:auto; border-bottom-right-radius:4px;}
 .voice-note{display:flex; align-items:center; gap:8px;}
-.voice-note .play{width:26px;height:26px;border-radius:50%; background:var(--forest); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;}
+.voice-note .play{width:26px;height:26px;border-radius:50%; background:var(--forest); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; cursor:pointer;}
 .voice-note .wave{flex:1; height:20px; display:flex; align-items:center; gap:2px;}
 .voice-note .wave i{width:2.5px; background:var(--leaf); border-radius:2px; display:inline-block;}
 
 .wa-inputbar{display:flex; gap:8px; margin-top:10px; align-items:center;}
-.wa-input{flex:1; background:#fff; border-radius:999px; padding:11px 14px; font-size:13.5px; color:var(--ink-soft); border:1px solid var(--line);}
-.wa-mic{width:42px;height:42px;border-radius:50%; background:var(--leaf); color:#fff; border:none; font-size:18px; cursor:pointer; flex-shrink:0;}
+.wa-input{flex:1; background:#fff; border-radius:999px; padding:11px 14px; font-size:13.5px; color:var(--ink-soft); border:1px solid var(--line); text-align:center;}
+.wa-mic{width:42px;height:42px;border-radius:50%; background:var(--leaf); color:#fff; border:none; font-size:18px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
 
 .alert-list-item{display:flex; gap:12px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:13px; margin-bottom:10px;}
 .alert-list-item .ic{width:38px;height:38px;border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px;}
@@ -288,6 +291,15 @@ img{max-width:100%;display:block;}
 .followup-thanks.show{display:block;}
 
 .privacy-note{display:flex; gap:8px; align-items:flex-start; font-size:11.5px; color:var(--ink-soft); background:var(--leaf-light); border-radius:10px; padding:9px 11px; margin-top:10px;}
+
+/* ---------- Modal ---------- */
+.modal{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200;
+  align-items:center; justify-content:center; padding:20px;
+}
+.modal.show{
+  display:flex;
+}
 </style>
 </head>
 <body>
@@ -306,17 +318,19 @@ img{max-width:100%;display:block;}
       <div class="top-actions">
         <button class="lang-pill" id="langBtn">हिंदी</button>
         <button class="icon-btn" id="bellBtn">🔔</button>
+        <button class="icon-btn" id="settingsBtn" style="font-size:14px;">⚙️</button>
       </div>
     </div>
     <div class="status-strip">
       <span class="dot" id="netDot"></span>
-      <span id="netText">Online · Ghaziabad, UP · 3 farmers nearby reporting</span>
+      <span id="netText">Online · नासिक, महाराष्ट्र · 3 farmers reporting</span>
     </div>
   </div>
 
+  <!-- PWA Install Banner -->
   <div class="install-banner" id="installBanner">
     <span style="font-size:20px;">📲</span>
-    <div style="flex:1; font-size:12.5px; font-weight:600;">Install Prayas AI on your phone — works offline, no app store needed.</div>
+    <div id="installBannerText" style="flex:1; font-size:12.5px; font-weight:600;">Install Prayas AI on your phone — works offline, no app store needed.</div>
     <button id="installBtn">Install</button>
   </div>
 
@@ -331,17 +345,80 @@ img{max-width:100%;display:block;}
         <button class="mic-btn" id="micBtn">🎙️</button>
       </div>
       <div class="hero-hint" id="micHint">माइक दबाकर बोलें</div>
+      
+      <!-- Text fallback input for accessibility -->
+      <div style="margin-top:18px; display:flex; gap:8px;">
+        <input type="text" id="manualQueryInput" placeholder="यहाँ प्रश्न टाइप करें..." style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13.5px; background:var(--paper-dim); color:var(--ink);">
+        <button id="manualQueryBtn" class="btn btn-primary" style="width:auto; padding:10px 16px; border-radius:10px; font-size:13px;">भेजें</button>
+      </div>
+
       <div class="hero-transcript" id="heroTranscript">
-        <b>आपने कहा</b>
+        <b id="queryLabel">आपने कहा / Your Query</b>
         <div id="transcriptText"></div>
       </div>
       <div class="hero-reply" id="heroReply" style="display:none;">
-        <b>Prayas AI जवाब</b>
+        <b id="replyLabel">Prayas AI जवाब</b>
         <div id="replyText"></div>
         <button class="speak-again" id="speakAgainBtn">🔊 दोबारा सुनें</button>
       </div>
     </div>
 
+    <!-- IoT Sensors Card -->
+    <div class="section-title" id="iotTitle">🛰️ खेत सेंसर एवं कीट फंदे (IoT Sensors & Pest Traps)</div>
+    <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; margin-bottom:4px; -webkit-overflow-scrolling:touch;">
+      <div style="flex:0 0 135px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:12px 10px; text-align:center; box-shadow:0 4px 10px -8px rgba(0,0,0,0.15);">
+        <span style="font-size:22px; display:block; margin-bottom:4px;">🪰</span>
+        <span id="iotTrapLabel" style="font-size:11px; color:var(--ink-soft); display:block;">कीट फंदा (Trap)</span>
+        <b style="font-size:13px; display:block; margin:4px 0;" id="sensorTrapCount">14 कीट / दिन</b>
+        <span style="font-size:10px; font-weight:700; background:#FCEBD9; color:var(--turmeric-deep); padding:2px 6px; border-radius:4px;" id="sensorTrapStatus">निगरानी</span>
+      </div>
+      <div style="flex:0 0 135px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:12px 10px; text-align:center; box-shadow:0 4px 10px -8px rgba(0,0,0,0.15);">
+        <span style="font-size:22px; display:block; margin-bottom:4px;">💧</span>
+        <span id="iotSoilLabel" style="font-size:11px; color:var(--ink-soft); display:block;">मिट्टी नमी (Soil)</span>
+        <b style="font-size:13px; display:block; margin:4px 0;" id="sensorSoilMoisture">32% (सूखी)</b>
+        <span style="font-size:10px; font-weight:700; background:#FBE4E0; color:var(--red); padding:2px 6px; border-radius:4px;" id="sensorSoilStatus">सिंचाई आवश्यक</span>
+      </div>
+      <div style="flex:0 0 135px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:12px 10px; text-align:center; box-shadow:0 4px 10px -8px rgba(0,0,0,0.15);">
+        <span style="font-size:22px; display:block; margin-bottom:4px;">🍃</span>
+        <span id="iotWetnessLabel" style="font-size:11px; color:var(--ink-soft); display:block;">पत्ती गीलापन (Wetness)</span>
+        <b style="font-size:13px; display:block; margin:4px 0;" id="sensorLeafWetness">82% (उच्च)</b>
+        <span style="font-size:10px; font-weight:700; background:#FBE4E0; color:var(--red); padding:2px 6px; border-radius:4px;" id="sensorWetnessStatus">संक्रमण खतरा</span>
+      </div>
+    </div>
+    <div style="text-align:right; margin-bottom:12px;">
+      <button id="refreshSensorsBtn" style="border:none; background:none; color:var(--forest); font-size:11px; font-weight:700; cursor:pointer;">🔄 सेंसर डेटा अपडेट करें</button>
+    </div>
+
+    <!-- Weather & Disease Forecast Card -->
+    <div class="section-title" id="weatherTitle">🌦️ मौसम एवं बीमारी जोखिम पूर्वानुमान (Weather & Risk)</div>
+    <div style="background:#fff; border:1px solid var(--line); border-radius:18px; padding:14px; margin-bottom:16px; box-shadow:0 4px 10px -8px rgba(0,0,0,0.15);">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:24px;">🌦|🌧</span>
+          <div>
+            <b style="font-size:13.5px;" id="weatherTemp">27°C · आर्द्रता 92%</b>
+            <span id="weatherForecastSub" style="font-size:11.5px; color:var(--ink-soft); display:block;">अगले 3 दिन: हल्की-मध्यम बारिश (80%)</span>
+          </div>
+        </div>
+        <span id="weatherLocationBadge" style="font-size:11px; font-weight:800; background:#E4F1E8; color:var(--green); padding:4px 8px; border-radius:999px;">नाशिक, महाराष्ट्र</span>
+      </div>
+      <div style="font-size:12.5px; line-height:1.5;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span id="lblLateBlight" style="color:var(--ink-soft);">पत्ता झुलसा रोग (Late Blight) जोखिम:</span>
+          <b style="color:var(--red);" id="riskLateBlight">उच्च (High Risk)</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span id="lblPowderyMildew" style="color:var(--ink-soft);">चूर्णिल आसिता (Powdery Mildew) जोखिम:</span>
+          <b style="color:var(--green);" id="riskPowderyMildew">कम (Low Risk)</b>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span id="lblStemBorer" style="color:var(--ink-soft);">तना छेदक कीट (Stem Borer) जोखिम:</span>
+          <b style="color:var(--turmeric-deep);" id="riskStemBorer">मध्यम (Medium)</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
     <div class="alert-banner" id="topAlertBanner" onclick="goTo('map')">
       <div class="ic">⚠️</div>
       <div>
@@ -350,52 +427,52 @@ img{max-width:100%;display:block;}
       </div>
     </div>
 
-    <div class="section-title">🚀 त्वरित सेवाएँ</div>
+    <div class="section-title" id="servicesTitle">🚀 त्वरित सेवाएँ</div>
     <div class="grid4">
       <div class="tile g1" onclick="goTo('scan')">
         <div class="ic">📷</div>
-        <div class="lbl">फ़सल स्कैन करें</div>
-        <div class="sub">रोग की पहचान 10 सेकंड में</div>
+        <div class="lbl" id="serviceScanTitle">फ़सल स्कैन करें</div>
+        <div class="sub" id="serviceScanSub">AI रोग पहचान व इलाज</div>
       </div>
       <div class="tile g2" onclick="goTo('map')">
         <div class="ic">🗺️</div>
-        <div class="lbl">जोखिम नक्शा</div>
-        <div class="sub">आस-पास का लाइव अलर्ट</div>
+        <div class="lbl" id="serviceMapTitle">जोखिम नक्शा</div>
+        <div class="sub" id="serviceMapSub">आस-पास का लाइव अलर्ट</div>
       </div>
       <div class="tile g3" onclick="goTo('prices')">
         <div class="ic">💰</div>
-        <div class="lbl">मंडी भाव</div>
-        <div class="sub">सबसे अच्छा दाम खोजें</div>
+        <div class="lbl" id="servicePricesTitle">मंडी भाव</div>
+        <div class="sub" id="servicePricesSub">भाड़ा घटाकर सही दाम</div>
       </div>
       <div class="tile g4" onclick="goTo('alerts')">
         <div class="ic">💬</div>
-        <div class="lbl">WhatsApp सहायक</div>
-        <div class="sub">वॉइस नोट भेजें</div>
+        <div class="lbl" id="serviceAlertsTitle">WhatsApp सहायक</div>
+        <div class="sub" id="serviceAlertsSub">वॉइस नोट भेजें</div>
       </div>
       <div class="tile g1" onclick="goTo('expert')" style="grid-column:1 / -1;">
         <div style="display:flex; align-items:center; gap:12px;">
           <div class="ic" style="margin:0;">🧑‍🌾</div>
           <div>
-            <div class="lbl">विशेषज्ञ सत्यापन डैशबोर्ड</div>
-            <div class="sub">KVK/कृषि अधिकारी के लिए — लंबित मामले देखें</div>
+            <div class="lbl" id="serviceExpertTitle">विशेषज्ञ सत्यापन डैशबोर्ड</div>
+            <div class="sub" id="serviceExpertSub">कृषि विज्ञान केंद्र (KVK) कृषि अधिकारी लॉगिन</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="section-title">📍 आपके क्षेत्र में हाल की गतिविधि</div>
+    <div class="section-title" id="activityTitle">📍 आपके क्षेत्र में हाल की गतिविधि</div>
     <div id="homeFeed"></div>
   </div>
 
   <!-- ============ SCAN ============ -->
   <div class="screen" id="screen-scan">
-    <h2 style="margin:4px 0 4px;">फ़सल स्कैन करें</h2>
-    <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px;">पत्ती या फल की साफ़ फ़ोटो लें — कैमरा सीधे या गैलरी से चुनें।</p>
+    <h2 id="scanTitle" style="margin:4px 0 4px;">फ़सल स्कैन करें</h2>
+    <p id="scanSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px;">पत्ती या फल की साफ़ फ़ोटो लें — लाइव विश्लेषण के लिए सीधे कैमरा चुनें।</p>
 
     <div class="scan-drop" id="scanDrop">
       <div class="ic">🌿</div>
-      <div class="t">फ़ोटो लें / अपलोड करें</div>
-      <div class="s">Tap to open camera or gallery</div>
+      <div class="t" id="scanUploadText">फ़ोटो लें / अपलोड करें</div>
+      <div class="s" id="scanCameraText">Tap to open camera or gallery</div>
     </div>
     <input type="file" id="scanFile" accept="image/*" capture="environment">
 
@@ -417,10 +494,10 @@ img{max-width:100%;display:block;}
         <div class="conf-badge high" id="resConf">92%</div>
       </div>
       <div class="alt-causes" id="resAlt"></div>
-      <div style="font-size:11px; color:var(--ink-soft); margin-top:8px;">⚠️ यह अंतिम निदान नहीं है — AI का अनुमान है।</div>
+      <div id="scanWarningNote" style="font-size:11px; color:var(--ink-soft); margin-top:8px;">⚠️ यह अंतिम निदान नहीं है — AI का अनुमान है।</div>
 
       <div class="uncertain-box" id="uncertainBox">
-        🤔 भरोसा कम है। एक और साफ़ फ़ोटो भेजें, या सीधे विशेषज्ञ को केस भेजें।
+        <span id="scanUncertainText">🤔 भरोसा कम है। एक और साफ़ फ़ोटो भेजें, या सीधे विशेषज्ञ को केस भेजें।</span>
         <div style="margin-top:8px; display:flex; gap:8px;">
           <button class="btn btn-outline" style="padding:9px;" id="retakeBtn">📷 दोबारा फ़ोटो लें</button>
           <button class="btn btn-primary" style="padding:9px;" id="sendExpertBtn">🧑‍🌾 विशेषज्ञ को भेजें</button>
@@ -432,98 +509,128 @@ img{max-width:100%;display:block;}
       <div class="result-actions" id="resultActionsRow">
         <button class="btn btn-turmeric" id="alertNearbyBtn">📢 समुदाय रिपोर्ट में जोड़ें</button>
       </div>
-      <div class="privacy-note" id="privacyNote">🔒 आपके खेत का सटीक स्थान छुपाया जाएगा — केवल गाँव/ग्रिड स्तर पर दिखेगा।</div>
+      <div class="privacy-note" id="privacyNote">🔒 आपके खेत का स्थान छुपाया जाएगा — केवल गाँव/ग्रिड स्तर पर दिखेगा।</div>
       <button class="btn btn-outline" style="margin-top:10px;" id="rescanBtn">🔁 दोबारा स्कैन करें</button>
 
       <div class="followup-box" id="followupBox">
-        <div class="followup-q">🔔 2 दिन बाद: क्या हालत सुधरी?</div>
+        <div class="followup-q" id="scanFollowupTitle">🔔 2 दिन बाद: क्या फ़सल की हालत सुधरी?</div>
         <div class="followup-chips">
-          <button data-v="better">🙂 बेहतर</button>
-          <button data-v="same">😐 वैसी ही</button>
-          <button data-v="worse">🙁 बिगड़ी</button>
+          <button data-v="better" id="btnFollowupBetter">🙂 बेहतर</button>
+          <button data-v="same" id="btnFollowupSame">😐 वैसी ही</button>
+          <button data-v="worse" id="btnFollowupWorse">🙁 बिगड़ी</button>
         </div>
         <div class="followup-thanks" id="followupThanks">धन्यवाद! यह जानकारी भविष्य की सलाह सुधारने में मदद करेगी।</div>
       </div>
     </div>
 
-    <div class="pill-note">Demo mode: on-device preview only. Production calls Gemini's multimodal API for image reasoning (with alternate-cause suggestions and a confidence score), falling back to a lighter on-device model on 2G/3G.</div>
+    <div class="pill-note">Live Mode: Calls Gemini's Multimodal API to read the leaf photo for crop diagnosis. Falls back locally if credentials are unconfigured or offline.</div>
   </div>
 
   <!-- ============ MAP ============ -->
   <div class="screen" id="screen-map">
-    <h2 style="margin:4px 0 4px;">सामुदायिक जोखिम नक्शा</h2>
-    <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 14px;">हर घेरा एक किसान की रिपोर्ट है — रंग जितना गहरा, खतरा उतना ज़्यादा।</p>
+    <h2 id="mapTitle" style="margin:4px 0 4px;">सामुदायिक जोखिम नक्शा</h2>
+    <p id="mapSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 14px;">हर घेरा एक किसान की रिपोर्ट है — रंग जितना गहरा, खतरा उतना ज़्यादा।</p>
     <div id="map"></div>
-    <div class="legend">
+    <div class="legend" id="mapLegend">
       <span><i style="background:var(--green);"></i> हरा · कम जोखिम</span>
       <span><i style="background:var(--yellow);"></i> पीला · निगरानी करें</span>
-      <span><i style="background:var(--orange);"></i> नारंगी · कई समान रिपोर्ट</span>
-      <span><i style="background:var(--red);"></i> लाल · तेज़ी से बढ़ रहा / सत्यापित</span>
+      <span><i style="background:var(--orange);"></i> नारंगी · कई रिपोर्ट</span>
+      <span><i style="background:var(--red);"></i> लाल · सत्यापित खतरा</span>
     </div>
     <div class="map-stats">
-      <div class="stat-card"><b id="statReports">27</b><span>रिपोर्ट (7 दिन)</span></div>
-      <div class="stat-card"><b id="statHot">3</b><span>सक्रिय हॉटस्पॉट</span></div>
-      <div class="stat-card"><b id="statFarmers">146</b><span>जुड़े किसान</span></div>
+      <div class="stat-card"><b id="statReports">27</b><span id="mapReportsStat">रिपोर्ट (7 दिन)</span></div>
+      <div class="stat-card"><b id="statHot">3</b><span id="mapHotspotsStat">सक्रिय हॉटस्पॉट</span></div>
+      <div class="stat-card"><b id="statFarmers">146</b><span id="mapFarmersStat">जुड़े किसान</span></div>
     </div>
-    <div class="pill-note">Live prototype: circles are seeded demo data + anything you report via Scan. Production version pulls from Krishi-DSS satellite/weather layers and the govt's National Pest Surveillance System to cross-verify farmer reports before broadcasting an alert.</div>
+    <div class="pill-note">Live map centered on Nashik, Maharashtra. Automatically syncs reports from the database and updates hotspot circles. Grid-level mapping preserves individual farm privacy.</div>
   </div>
 
   <!-- ============ PRICES ============ -->
   <div class="screen" id="screen-prices">
-    <h2 style="margin:4px 0 4px;">मंडी भाव तुलना</h2>
-    <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 14px;">💡 सबसे ऊँचा भाव हमेशा सबसे ज़्यादा मुनाफ़ा नहीं होता — दूरी और भाड़ा घटाकर असली फ़ायदा यहाँ दिखाया गया है।</p>
+    <h2 id="pricesTitle" style="margin:4px 0 4px;">मंडी भाव तुलना (Maharashtra Mandis)</h2>
+    <p id="pricesSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 14px;">💡 सबसे ऊँचा भाव हमेशा सबसे ज़्यादा मुनाफ़ा नहीं होता — दूरी और भाड़ा घटाकर असली फ़ायदा यहाँ देखें।</p>
     <div class="crop-select" id="cropSelect"></div>
     <div id="priceList"></div>
-    <div class="pill-note">Prices seeded from Agmarknet/e-NAM structure (4,367+ linked mandis). "Net price" = modal price − estimated transport (₹3.5/km/quintal) — this local ranking is what's missing from the raw Agmarknet feed.</div>
+    <div class="pill-note">Prices modeled for major Maharashtra hubs. "Net price" = modal price − transport (₹3.5/km/quintal) to find the most profitable market.</div>
   </div>
 
   <!-- ============ ALERTS / WHATSAPP ============ -->
   <div class="screen" id="screen-alerts">
-    <h2 style="margin:4px 0 4px;">WhatsApp सहायक</h2>
-    <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 14px;">बिना ऐप खोले, सिर्फ़ वॉइस नोट भेजकर मदद पाएँ।</p>
+    <h2 id="waTitle" style="margin:4px 0 4px;">WhatsApp सहायक</h2>
+    <p id="waSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 14px;">बिना ऐप खोले, सिर्फ़ वॉइस नोट भेजकर मदद पाएँ।</p>
 
     <div class="wa-shell">
       <div class="wa-head">
         <div class="wa-avatar">🌾</div>
         <div>
           <div class="wa-title">Prayas AI Bot</div>
-          <div class="wa-sub">+91 98xxx xxxxx · आमतौर पर तुरंत जवाब देता है</div>
+          <div class="wa-sub" id="waBotStatus">+91 98xxx xxxxx · आमतौर पर तुरंत जवाब देता है</div>
         </div>
       </div>
-      <div id="waThread">
-        <div class="wa-bubble wa-in">🙏 नमस्ते! आप वॉइस नोट या फ़ोटो भेज सकते हैं। मैं आपकी भाषा में जवाब दूँगा।</div>
+      <div class="wa-thread" id="waThread">
+        <div class="wa-bubble wa-in" id="waInitialMsg">🙏 नमस्ते! आप वॉइस नोट या फ़ोटो भेज सकते हैं। मैं आपकी भाषा में जवाब दूँगा।</div>
         <div class="wa-bubble wa-out">
-          <div class="voice-note"><div class="play">▶</div><div class="wave" id="wave1"></div><span style="font-size:11px;">0:07</span></div>
+          <div class="voice-note"><div class="play" onclick="playMockVoice('wave1')">▶</div><div class="wave" id="wave1"></div><span style="font-size:11px;">0:07</span></div>
         </div>
-        <div class="wa-bubble wa-in">🎧 सुना: <i>"मेरे टमाटर के पत्ते पीले पड़ रहे हैं, क्या करूँ?"</i><br><br>यह नाइट्रोजन की कमी जैसा लगता है। यूरिया 20g/लीटर पानी में घोलकर छिड़काव करें। 2km में 4 किसानों ने ऐसा ही बताया है — नक्शा देखें।</div>
+        <div class="wa-bubble wa-in" id="waDemoReplyMsg">🎧 सुना: <i>"मेरे टमाटर के पत्ते पीले पड़ रहे हैं, क्या करूँ?"</i><br><br>यह नाइट्रोजन की कमी जैसा लगता है। यूरिया 20g/लीटर पानी में घोलकर छिड़काव करें। 2km में 4 किसानों ने ऐसा ही बताया है — नक्शा देखें।</div>
       </div>
       <div class="wa-inputbar">
-        <div class="wa-input" id="waInputText">🎙️ वॉइस नोट भेजने के लिए दबाकर रखें</div>
+        <div class="wa-input" id="waInputText">🎙️ वॉइस नोट भेजने के लिए दबाएँ</div>
         <button class="wa-mic" id="waMicBtn">🎙️</button>
       </div>
     </div>
 
-    <div class="section-title">📋 सामुदायिक अलर्ट सूची</div>
+    <div class="section-title" id="waAlertsTitle">📋 सामुदायिक अलर्ट सूची</div>
     <div id="alertsFullList"></div>
 
-    <div class="pill-note">Production path: WhatsApp Cloud API webhook → Sarvam AI (Saarika STT / Bulbul TTS) for Indic ASR+TTS → intent router → same crop-advisory + heatmap backend used by the app, so a farmer with zero smartphone literacy gets full functionality through plain WhatsApp voice notes.</div>
+    <div class="pill-note">Interactive Simulator: Clicking the microphone will record your actual voice, send it to Sarvam STT, process it, and generate a regional voice note answer from Sarvam TTS.</div>
   </div>
 
   <!-- ============ EXPERT DASHBOARD ============ -->
   <div class="screen" id="screen-expert">
-    <h2 style="margin:4px 0 4px;">विशेषज्ञ सत्यापन डैशबोर्ड</h2>
-    <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px;">KVK कार्यकर्ता / कृषि अधिकारी यहाँ AI के अनुमान की पुष्टि करते हैं इससे पहले कि समुदाय को चेतावनी भेजी जाए।</p>
+    <h2 id="expertTitle" style="margin:4px 0 4px;">विशेषज्ञ सत्यापन डैशबोर्ड</h2>
+    <p id="expertSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px;">KVK कार्यकर्ता / कृषि अधिकारी यहाँ AI के अनुमान की पुष्टि करते हैं, जिससे समुदाय को सत्यापित लाल-श्रेणी चेतावनी भेजी जा सके।</p>
     <div id="expertList"></div>
-    <div class="pill-note">Why this screen matters: it's the difference between "an app that guesses" and "a system with a human accountable for what gets broadcast." Low-confidence AI calls and any case that would trigger a red-tier community alert route here before farmers see it — this is what stops false-alert fatigue.</div>
+    <div class="pill-note">This dashboard protects farmers from false-alert fatigue. Trigger alerts and add them directly to the map by confirming cases.</div>
+  </div>
+
+  <!-- ============ SETTINGS MODAL ============ -->
+  <div id="settingsModal" class="modal">
+    <div style="background:#fff; border-radius:20px; padding:22px; width:100%; max-width:400px; box-shadow:var(--shadow); position:relative;">
+      <h3 style="margin-top:0; color:var(--forest);">⚙️ API Settings</h3>
+      <p style="font-size:12px; color:var(--ink-soft); margin-bottom:16px;">
+        API keys are securely held on Netlify serverless functions. To override keys locally (for local static testing), paste them here. Stored strictly in your browser storage.
+      </p>
+      
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Gemini API Key</label>
+        <input type="password" id="localGeminiKey" placeholder="AIzaSy..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px;">
+      </div>
+      
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Sarvam AI Subscription Key</label>
+        <input type="password" id="localSarvamKey" placeholder="sk_..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px;">
+      </div>
+
+      <div style="margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="useMockMode" style="width:16px; height:16px; accent-color:var(--forest);">
+        <label for="useMockMode" style="font-size:13px; font-weight:600; cursor:pointer;">Use Local Offline Demo Data</label>
+      </div>
+      
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" id="closeSettingsBtn" style="padding:10px; flex:1;">Close</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="padding:10px; flex:1;">Save Keys</button>
+      </div>
+    </div>
   </div>
 
   <!-- ============ BOTTOM NAV ============ -->
   <div class="bottomnav">
-    <button class="nav-btn active" data-screen="home" onclick="goTo('home')"><span class="ic">🏠</span><span class="lbl">होम</span></button>
-    <button class="nav-btn" data-screen="scan" onclick="goTo('scan')"><span class="ic">📷</span><span class="lbl">स्कैन</span></button>
-    <button class="nav-btn" data-screen="map" onclick="goTo('map')"><span class="ic">🗺️</span><span class="lbl">नक्शा</span></button>
-    <button class="nav-btn" data-screen="prices" onclick="goTo('prices')"><span class="ic">💰</span><span class="lbl">भाव</span></button>
-    <button class="nav-btn" data-screen="alerts" onclick="goTo('alerts')"><span class="ic">💬</span><span class="lbl">अलर्ट</span></button>
+    <button class="nav-btn active" data-screen="home" onclick="goTo('home')"><span class="ic">🏠</span><span class="lbl" id="navHome">होम</span></button>
+    <button class="nav-btn" data-screen="scan" onclick="goTo('scan')"><span class="ic">📷</span><span class="lbl" id="navScan">स्कैन</span></button>
+    <button class="nav-btn" data-screen="map" onclick="goTo('map')"><span class="ic">🗺️</span><span class="lbl" id="navMap">नक्शा</span></button>
+    <button class="nav-btn" data-screen="prices" onclick="goTo('prices')"><span class="ic">💰</span><span class="lbl" id="navPrices">भाव</span></button>
+    <button class="nav-btn" data-screen="alerts" onclick="goTo('alerts')"><span class="ic">💬</span><span class="lbl" id="navAlerts">अलर्ट</span></button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -531,24 +638,447 @@ img{max-width:100%;display:block;}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* ================= i18n (lightweight) ================= */
+/* ================= i18n Dictionary (Eng / Hindi / Marathi) ================= */
 const STR = {
-  hi:{
-    tagline:"आपकी आवाज़, आपकी खेती",
-    heroLabel:"बोलिए, मैं सुन रहा हूँ — फ़सल, मंडी भाव या मौसम पूछें",
-    micHint:"माइक दबाकर बोलें",
-    listening:"सुन रहा हूँ...",
+  hi: {
+    tagline: "आपकी आवाज़, आपकी खेती",
+    heroLabel: "बोलिए, मैं सुन रहा हूँ — फ़सल, मंडी भाव या मौसम पूछें",
+    micHint: "माइक दबाकर बोलें",
+    listening: "सुन रहा हूँ...",
+    btnText: "भेजें",
+    placeholder: "यहाँ प्रश्न टाइप करें...",
+    pwaText: "अपने फोन पर Prayas AI इंस्टॉल करें — ऑफलाइन काम करता है।",
+    pwaBtn: "इंस्टॉल करें",
+    
+    // Bottom Nav
+    navHome: "होम",
+    navScan: "स्कैन",
+    navMap: "नक्शा",
+    navPrices: "भाव",
+    navAlerts: "अलर्ट",
+    
+    // IoT Sensors Section
+    iotTitle: "🛰️ खेत सेंसर एवं कीट फंदे (IoT Sensors & Pest Traps)",
+    iotTrap: "कीट फंदा (Trap)",
+    iotSoil: "मिट्टी नमी (Soil)",
+    iotWetness: "पत्ती गीलापन (Wetness)",
+    iotPestsUnit: "कीट / दिन",
+    iotDry: "सूखी",
+    iotWet: "गीली",
+    iotNormal: "सामान्य",
+    iotHigh: "उच्च",
+    iotDanger: "खतरा",
+    iotAlert: "निगरानी",
+    iotIrrigationNeeded: "सिंचाई आवश्यक",
+    iotSufficientMoisture: "पर्याप्त नमी",
+    iotInfectionRisk: "संक्रमण खतरा",
+    iotSafe: "सुरक्षित",
+    iotRefreshBtn: "🔄 सेंसर डेटा अपडेट करें",
+    
+    // Weather & Risk Section
+    weatherTitle: "🌦️ मौसम एवं बीमारी जोखिम पूर्वानुमान (Weather & Risk)",
+    weatherForecast: "अगले 3 दिन: हल्की-मध्यम बारिश (80%)",
+    weatherLocation: "नाशिक, महाराष्ट्र",
+    riskLateBlight: "पत्ता झुलसा रोग (Late Blight) जोखिम:",
+    riskPowderyMildew: "चूर्णिल आसिता (Powdery Mildew) जोखिम:",
+    riskStemBorer: "तना छेदक कीट (Stem Borer) जोखिम:",
+    riskHigh: "उच्च (High Risk)",
+    riskMed: "मध्यम (Medium)",
+    riskLow: "कम (Low Risk)",
+    
+    // Alert Banner
+    alertBannerTitle: "पत्ता झुलसा रोग — जोखिम बढ़ा (नारंगी → लाल)",
+    alertBannerSub: "48 घंटे में 6 मिलती-जुलती रिपोर्ट मिलीं · विशेषज्ञ ने पुष्टि की · नक्शे पर देखें",
+    
+    // Quick Services Section
+    servicesTitle: "🚀 त्वरित सेवाएँ",
+    serviceScanTitle: "फ़सल स्कैन करें",
+    serviceScanSub: "AI रोग पहचान व इलाज",
+    serviceMapTitle: "जोखिम नक्शा",
+    serviceMapSub: "आस-पास का लाइव अलर्ट",
+    servicePricesTitle: "मंडी भाव",
+    servicePricesSub: "भाड़ा घटाकर सही दाम",
+    serviceAlertsTitle: "WhatsApp सहायक",
+    serviceAlertsSub: "वॉइस नोट भेजें",
+    serviceExpertTitle: "विशेषज्ञ सत्यापन डैशबोर्ड",
+    serviceExpertSub: "कृषि विज्ञान केंद्र (KVK) कृषि अधिकारी लॉगिन",
+    
+    // Recent Activity Section
+    activityTitle: "📍 आपके क्षेत्र में हाल की गतिविधि",
+    
+    // Scan Screen UI
+    scanTitle: "फ़सल स्कैन करें",
+    scanSub: "पत्ती या फल की साफ़ फ़ोटो लें — लाइव विश्लेषण के लिए सीधे कैमरा चुनें।",
+    scanUploadText: "फ़ोटो लें / अपलोड करें",
+    scanCameraText: "Tap to open camera or gallery",
+    scanAnalyzingText: "विश्लेषण हो रहा है...",
+    scanAltCauses: "संभावित अन्य कारण:",
+    scanWarningNote: "⚠️ यह अंतिम निदान नहीं है — AI का अनुमान है।",
+    scanUncertainText: "🤔 भरोसा कम है। एक और साफ़ फ़ोटो भेजें, या सीधे विशेषज्ञ को केस भेजें।",
+    scanRetakeBtn: "📷 दोबारा फ़ोटो लें",
+    scanSendExpertBtn: "🧑‍🌾 विशेषज्ञ को भेजें",
+    scanAddReportBtn: "📢 समुदाय रिपोर्ट में जोड़ें",
+    scanPrivacyNote: "🔒 आपके खेत का स्थान छुपाया जाएगा — केवल गाँव/ग्रिड स्तर पर दिखेगा।",
+    scanRescanBtn: "🔁 दोबारा स्कैन करें",
+    scanFollowupTitle: "🔔 2 दिन बाद: क्या फ़सल की हालत सुधरी?",
+    scanFollowupBetter: "🙂 बेहतर",
+    scanFollowupSame: "😐 वैसी ही",
+    scanFollowupWorse: "🙁 बिगड़ी",
+    scanFollowupThanks: "धन्यवाद! यह जानकारी भविष्य की सलाह सुधारने में मदद करेगी।",
+    
+    // Map Screen UI
+    mapTitle: "सामुदायिक जोखिम नक्शा",
+    mapSub: "हर घेरा एक किसान की रिपोर्ट है — रंग जितना गहरा, खतरा उतना ज़्यादा।",
+    mapLegendGreen: "हरा · कम जोखिम",
+    mapLegendYellow: "पीला · निगरानी करें",
+    mapLegendOrange: "नारंगी · कई रिपोर्ट",
+    mapLegendRed: "लाल · सत्यापित खतरा",
+    mapReportsStat: "रिपोर्ट (7 दिन)",
+    mapHotspotsStat: "सक्रिय हॉटस्पॉट",
+    mapFarmersStat: "जुड़े किसान",
+    
+    // Prices Screen UI
+    pricesTitle: "मंडी भाव तुलना (Maharashtra Mandis)",
+    pricesSub: "💡 सबसे ऊँचा भाव हमेशा सबसे ज़्यादा मुनाफ़ा नहीं होता — दूरी और भाड़ा घटाकर असली फ़ायदा यहाँ देखें।",
+    pricesBestReturn: "✓ सबसे फ़ायदेमंद (Best Return)",
+    pricesAway: "km दूर",
+    pricesFreight: "भाड़ा ~₹",
+    pricesPerQuintal: "/क्विंटल",
+    pricesNetPrice: "असली भाव",
+    pricesMandiRate: "मंडी दर ₹",
+    
+    // WhatsApp UI
+    waTitle: "WhatsApp सहायक",
+    waSub: "बिना ऐप खोले, सिर्फ़ वॉइस नोट भेजकर मदद पाएँ।",
+    waBotStatus: "+91 98xxx xxxxx · आमतौर पर तुरंत जवाब देता है",
+    waInitialMsg: "🙏 नमस्ते! आप वॉइस नोट या फ़ोटो भेज सकते हैं। मैं आपकी भाषा में जवाब दूँगा।",
+    waInputPlaceholder: "🎙️ वॉइस नोट भेजने के लिए दबाएँ",
+    waAlertsTitle: "📋 सामुदायिक अलर्ट सूची",
+    
+    // Expert UI
+    expertTitle: "विशेषज्ञ सत्यापन डैशबोर्ड",
+    expertSub: "KVK कार्यकर्ता / कृषि अधिकारी यहाँ AI के अनुमान की पुष्टि करते हैं, जिससे समुदाय को सत्यापित लाल-श्रेणी चेतावनी भेजी जा सके।",
+    expertPending: "लंबित",
+    expertVerified: "सत्यापित",
+    expertRejected: "अस्वीकृत",
+    expertConfirmBtn: "✓ पुष्टि करें व अलर्ट भेजें",
+    expertEditBtn: "✎ सलाह बदलें",
+    expertRejectBtn: "✕ अस्वीकार करें",
+    expertToastVerified: "✅ सत्यापित — गाँव के किसानों को अलर्ट भेजा गया",
+    expertToastRejected: "केस अस्वीकृत — कोई अलर्ट नहीं भेजा जाएगा",
+    expertToastEdit: "सलाह संपादन खुला (विशेषज्ञ सुझाव बदल सकते हैं)",
+    
+    toastSaved: "⚙️ API कॉन्फिगरेशन सहेजा गया",
+    toastOffline: "Offline mode · showing cached data · sync when online"
   },
-  en:{
-    tagline:"Your voice, your farm",
-    heroLabel:"Tap and speak — ask about crops, prices or weather",
-    micHint:"Press mic to speak",
-    listening:"Listening...",
+  mr: {
+    tagline: "तुमचा आवाज, तुमची शेती",
+    heroLabel: "बोला, मी ऐकत आहे — पीक, बाजार भाव किंवा हवामान विचारा",
+    micHint: "माईक दाबा आणि बोला",
+    listening: "ऐकत आहे...",
+    btnText: "पाठवा",
+    placeholder: "येथे प्रश्न टाईप करा...",
+    pwaText: "आपल्या फोनवर Prayas AI इंस्टॉल करा — ऑफलाइन कार्य करते.",
+    pwaBtn: "इंस्टॉल करा",
+    
+    navHome: "होम",
+    navScan: "स्कॅन",
+    navMap: "नकाशा",
+    navPrices: "बाजार भाव",
+    navAlerts: "अलर्ट",
+    
+    iotTitle: "🛰️ शेत सेन्सर आणि कीटक सापळे (IoT Sensors & Pest Traps)",
+    iotTrap: "कीटक सापळा (Trap)",
+    iotSoil: "मातीतील ओलावा (Soil)",
+    iotWetness: "पानांची ओलावा (Wetness)",
+    iotPestsUnit: "कीटक / दिवस",
+    iotDry: "सुकी",
+    iotWet: "ओली",
+    iotNormal: "सामान्य",
+    iotHigh: "उच्च",
+    iotDanger: "धोका",
+    iotAlert: "निरीक्षण",
+    iotIrrigationNeeded: "पाण्याची गरज",
+    iotSufficientMoisture: "पुरेशी ओलसरपणा",
+    iotInfectionRisk: "संसर्गाचा धोका",
+    iotSafe: "सुरक्षित",
+    iotRefreshBtn: "🔄 सेन्सर डेटा अपडेट करा",
+    
+    weatherTitle: "🌦️ हवामान आणि रोग जोखीम अंदाज (Weather & Risk)",
+    weatherForecast: "पुढील ३ दिवस: हलका ते मध्यम पाऊस (८०%)",
+    weatherLocation: "नाशिक, महाराष्ट्र",
+    riskLateBlight: "पानांवरील करपा रोग (Late Blight) जोखीम:",
+    riskPowderyMildew: "भुरी रोग (Powdery Mildew) जोखीम:",
+    riskStemBorer: "खोडकिडा (Stem Borer) जोखीम:",
+    riskHigh: "उच्च (High Risk)",
+    riskMed: "मध्यम (Medium)",
+    riskLow: "कमी (Low Risk)",
+    
+    alertBannerTitle: "करपा रोग — जोखीम वाढली (नारंगी → लाल)",
+    alertBannerSub: "४८ तासांत ६ समान रिपोर्ट मिळाल्या · तज्ज्ञांनी पुष्टी केली · नकाशावर पहा",
+    
+    servicesTitle: "🚀 त्वरित सेवा",
+    serviceScanTitle: "पीक स्कॅन करा",
+    serviceScanSub: "AI रोग ओळख आणि उपचार",
+    serviceMapTitle: "जोखीम नकाशा",
+    serviceMapSub: "नजीकचा थेट अलर्ट",
+    servicePricesTitle: "बाजार भाव",
+    servicePricesSub: "वाहतूक खर्च वजा करून योग्य किंमत",
+    serviceAlertsTitle: "WhatsApp सहाय्यक",
+    serviceAlertsSub: "व्हॉइस नोट पाठवा",
+    serviceExpertTitle: "तज्ज्ञ पडताळणी डॅशबोर्ड",
+    serviceExpertSub: "कृषी विज्ञान केंद्र (KVK) कृषी अधिकारी लॉगिन",
+    
+    activityTitle: "📍 तुमच्या क्षेत्रातील अलीकडील हालचाली",
+    
+    scanTitle: "पीक स्कॅन करा",
+    scanSub: "पानाची किंवा फळाची स्वच्छ फोटो घ्या — थेट विश्लेषणासाठी कॅमेरा निवडा.",
+    scanUploadText: "फोटो घ्या / अपलोड करा",
+    scanCameraText: "Tap to open camera or gallery",
+    scanAnalyzingText: "विश्लेषण सुरू आहे...",
+    scanAltCauses: "इतर संभाव्य कारणे:",
+    scanWarningNote: "⚠️ हे अंतिम निदान नाही — AI चा अंदाज आहे.",
+    scanUncertainText: "🤔 खात्री कमी आहे. दुसरा स्वच्छ फोटो पाठवा, किंवा थेट तज्ज्ञांकडे केस पाठवा.",
+    scanRetakeBtn: "📷 पुन्हा फोटो घ्या",
+    scanSendExpertBtn: "🧑‍🌾 तज्ज्ञांकडे पाठवा",
+    scanAddReportBtn: "📢 समुदाय अहवालात जोडा",
+    scanPrivacyNote: "🔒 तुमच्या शेताचे स्थान लपवले जाईल — फक्त गाव/ग्रिड पातळीवर दिसेल.",
+    scanRescanBtn: "🔁 पुन्हा स्कॅन करा",
+    scanFollowupTitle: "🔔 २ दिवसांनंतर: पिकाची स्थिती सुधारली का?",
+    scanFollowupBetter: "🙂 सुधारली",
+    scanFollowupSame: "😐 तशीच आहे",
+    scanFollowupWorse: "🙁 बिघडली",
+    scanFollowupThanks: "धन्यवाद! ही माहिती भविष्यातील सल्ला सुधारण्यास मदत करेल.",
+    
+    mapTitle: "सामुदायिक जोखीम नकाशा",
+    mapSub: "प्रत्येक वर्तुळ एका शेतकऱ्याचा अहवाल आहे — रंग जितका गडद, धोका तितका जास्त.",
+    mapLegendGreen: "हिरवा · कमी जोखीम",
+    mapLegendYellow: "पिवळा · निरीक्षण करा",
+    mapLegendOrange: "नारंगी · अनेक रिपोर्ट",
+    mapLegendRed: "लाल · पडताळणी केलेला धोका",
+    mapReportsStat: "रिपोर्ट (७ दिवस)",
+    mapHotspotsStat: "सक्रिय हॉटस्पॉट",
+    mapFarmersStat: "कनेक्ट केलेले शेतकरी",
+    
+    pricesTitle: "बाजार भाव तुलना (Maharashtra Mandis)",
+    pricesSub: "💡 सर्वात जास्त भाव नेहमीच फायदेशीर नसतो — अंतर आणि वाहतूक वजा करून प्रत्यक्ष नफा येथे पहा.",
+    pricesBestReturn: "✓ सर्वात फायदेशीर (Best Return)",
+    pricesAway: "किमी दूर",
+    pricesFreight: "वाहतूक खर्च ~₹",
+    pricesPerQuintal: "/क्विंटल",
+    pricesNetPrice: "प्रत्यक्ष नफा",
+    pricesMandiRate: "बाजार भाव दर ₹",
+    
+    waTitle: "WhatsApp सहाय्यक",
+    waSub: "ॲप न उघडता, फक्त व्हॉइस नोट पाठवून मदत मिळवा.",
+    waBotStatus: "+91 98xxx xxxxx · सहसा लगेच उत्तर देतो",
+    waInitialMsg: "🙏 नमस्कार! आपण व्हॉइस नोट किंवा फोटो पाठवू शकता. मी आपल्या भाषेत उत्तर देईन.",
+    waInputPlaceholder: "🎙️ व्हॉइस नोट पाठवण्यासाठी दाबा",
+    waAlertsTitle: "📋 सामुदायिक अलर्ट यादी",
+    
+    expertTitle: "तज्ज्ञ पडताळणी डॅशबोर्ड",
+    expertSub: "KVK कार्यकर्ते / कृषी अधिकारी येथे AI च्या अंदाजाची पुष्टी करतात, जेणेकरून समुदायाला पडताळणी केलेली लाल-श्रेणी चेतावणी पाठविली जाऊ शकते.",
+    expertPending: "लंबित",
+    expertVerified: "पडताळणी केली",
+    expertRejected: "अस्वीकृत",
+    expertConfirmBtn: "✓ पुष्टी करा आणि अलर्ट पाठवा",
+    expertEditBtn: "✎ सल्ला बदला",
+    expertRejectBtn: "✕ नाकारा",
+    expertToastVerified: "✅ पडताळणी पूर्ण — गावातील शेतकऱ्यांना अलर्ट पाठवला आहे",
+    expertToastRejected: "केस नाकारली — कोणताही अलर्ट पाठवला जाणार नाही",
+    expertToastEdit: "सल्ला संपादन सुरू (तज्ज्ञ सूचना बदलू शकतात)",
+    
+    toastSaved: "⚙️ API कॉन्फिगरेशन यशस्वीरित्या जतन केले",
+    toastOffline: "Offline mode · showing cached data · sync when online"
+  },
+  en: {
+    tagline: "Your voice, your farm",
+    heroLabel: "Tap and speak — ask about crops, prices or weather",
+    micHint: "Press mic to speak",
+    listening: "Listening...",
+    btnText: "Send",
+    placeholder: "Type your query here...",
+    pwaText: "Install Prayas AI on your phone — works offline, no app store needed.",
+    pwaBtn: "Install",
+    
+    navHome: "Home",
+    navScan: "Scan",
+    navMap: "Map",
+    navPrices: "Prices",
+    navAlerts: "Alerts",
+    
+    iotTitle: "🛰️ IoT Sensors & Pest Traps",
+    iotTrap: "Pest Trap",
+    iotSoil: "Soil Moisture",
+    iotWetness: "Leaf Wetness",
+    iotPestsUnit: "pests / day",
+    iotDry: "Dry",
+    iotWet: "Wet",
+    iotNormal: "Normal",
+    iotHigh: "High",
+    iotDanger: "Danger",
+    iotAlert: "Alert",
+    iotIrrigationNeeded: "Irrigation Needed",
+    iotSufficientMoisture: "Sufficient Moisture",
+    iotInfectionRisk: "Infection Risk",
+    iotSafe: "Safe",
+    iotRefreshBtn: "🔄 Update Sensor Data",
+    
+    weatherTitle: "🌦️ Weather & Disease Risk Forecast",
+    weatherForecast: "Next 3 days: Light-moderate rain (80%)",
+    weatherLocation: "Nashik, Maharashtra",
+    riskLateBlight: "Late Blight Risk:",
+    riskPowderyMildew: "Powdery Mildew Risk:",
+    riskStemBorer: "Stem Borer Risk:",
+    riskHigh: "High Risk",
+    riskMed: "Medium",
+    riskLow: "Low Risk",
+    
+    alertBannerTitle: "Late Blight — Risk Increased (Orange → Red)",
+    alertBannerSub: "6 matching reports in 48h · Expert confirmed · View on map",
+    
+    servicesTitle: "🚀 Quick Services",
+    serviceScanTitle: "Scan Crop",
+    serviceScanSub: "AI Disease ID & Cure",
+    serviceMapTitle: "Risk Map",
+    serviceMapSub: "Nearby Live Alerts",
+    servicePricesTitle: "Mandi Prices",
+    servicePricesSub: "Net Price after Freight",
+    serviceAlertsTitle: "WhatsApp Assistant",
+    serviceAlertsSub: "Send Voice Note",
+    serviceExpertTitle: "Expert Dashboard",
+    serviceExpertSub: "KVK Agricultural Officer Login",
+    
+    activityTitle: "📍 Recent Activity in Your Area",
+    
+    scanTitle: "Scan Crop",
+    scanSub: "Take a clear photo of leaf or fruit — choose camera directly for live analysis.",
+    scanUploadText: "Take Photo / Upload",
+    scanCameraText: "Tap to open camera or gallery",
+    scanAnalyzingText: "Analyzing image...",
+    scanAltCauses: "Possible alternate causes:",
+    scanWarningNote: "⚠️ This is not a final diagnosis — AI estimate.",
+    scanUncertainText: "🤔 Low confidence. Send another clear photo, or send case directly to expert.",
+    scanRetakeBtn: "📷 Retake Photo",
+    scanSendExpertBtn: "🧑‍🌾 Send to Expert",
+    scanAddReportBtn: "📢 Add to Community Report",
+    scanPrivacyNote: "🔒 Your farm location will be hidden — only shown at village/grid level.",
+    scanRescanBtn: "🔁 Scan Again",
+    scanFollowupTitle: "🔔 2 Days Later: Did crop condition improve?",
+    scanFollowupBetter: "🙂 Better",
+    scanFollowupSame: "😐 Same",
+    scanFollowupWorse: "🙁 Worse",
+    scanFollowupThanks: "Thank you! This feedback helps improve future advice.",
+    
+    mapTitle: "Community Risk Map",
+    mapSub: "Each circle is a farmer's report — darker color means higher risk.",
+    mapLegendGreen: "Green · Low Risk",
+    mapLegendYellow: "Yellow · Monitor",
+    mapLegendOrange: "Orange · Multiple Reports",
+    mapLegendRed: "Red · Verified Risk",
+    mapReportsStat: "Reports (7 Days)",
+    mapHotspotsStat: "Active Hotspots",
+    mapFarmersStat: "Connected Farmers",
+    
+    pricesTitle: "Mandi Price Comparison (Maharashtra Mandis)",
+    pricesSub: "💡 The highest price is not always the most profitable — check net price after transport here.",
+    pricesBestReturn: "✓ Most Profitable (Best Return)",
+    pricesAway: "km away",
+    pricesFreight: "Freight ~₹",
+    pricesPerQuintal: "/quintal",
+    pricesNetPrice: "Net Profit",
+    pricesMandiRate: "Mandi Rate ₹",
+    
+    waTitle: "WhatsApp Assistant",
+    waSub: "Get help by sending a voice note, without opening the app.",
+    waBotStatus: "+91 98xxx xxxxx · Typically replies instantly",
+    waInitialMsg: "🙏 Hello! You can send a voice note or photo. I will reply in your language.",
+    waInputPlaceholder: "🎙️ Press to send voice note",
+    waAlertsTitle: "📋 Community Alert List",
+    
+    expertTitle: "Expert Verification Dashboard",
+    expertSub: "KVK workers / Agri officers verify AI estimates here to broadcast verified Red-tier alerts to the community.",
+    expertPending: "Pending",
+    expertVerified: "Verified",
+    expertRejected: "Rejected",
+    expertConfirmBtn: "✓ Confirm & Send Alert",
+    expertEditBtn: "✎ Edit Advice",
+    expertRejectBtn: "✕ Reject",
+    expertToastVerified: "✅ Verified — alert sent to village farmers",
+    expertToastRejected: "Case rejected — no alert will be broadcast",
+    expertToastEdit: "Advice editing opened (expert can edit suggestions)",
+    
+    toastSaved: "⚙️ API Configuration saved successfully",
+    toastOffline: "Offline mode · showing cached data · sync when online"
   }
 };
+
+const planKeyMap = {
+  hi: {
+    'Action': 'क्या करें',
+    'Timing': 'कब करें',
+    'Cost': 'अनुमानित लागत',
+    'Required': 'ज़रूरी सामान',
+    'Alternative': 'सस्ता विकल्प',
+    'Source': 'नज़दीकी स्रोत',
+    'Reinspection': 'दोबारा जाँच'
+  },
+  mr: {
+    'Action': 'काय करावे',
+    'Timing': 'केव्हा करावे',
+    'Cost': 'अंदाजे खर्च',
+    'Required': 'आवश्यक साहित्य',
+    'Alternative': 'स्वस्त पर्याय',
+    'Source': 'जवळचे स्त्रोत',
+    'Reinspection': 'पुन्हा तपासणी'
+  },
+  en: {
+    'Action': 'What to do',
+    'Timing': 'When to do',
+    'Cost': 'Estimated Cost',
+    'Required': 'Required Items',
+    'Alternative': 'Low-cost Option',
+    'Source': 'Nearest Source',
+    'Reinspection': 'Re-check'
+  }
+};
+
 let lang = 'hi';
 
-/* ================= Navigation ================= */
+/* ================= Local Keys / Settings ================= */
+function loadLocalConfig() {
+  document.getElementById('localGeminiKey').value = localStorage.getItem('prayas_gemini_key') || '';
+  document.getElementById('localSarvamKey').value = localStorage.getItem('prayas_sarvam_key') || '';
+  document.getElementById('useMockMode').checked = localStorage.getItem('prayas_mock_mode') === 'true';
+}
+
+function saveLocalConfig() {
+  localStorage.setItem('prayas_gemini_key', document.getElementById('localGeminiKey').value.trim());
+  localStorage.setItem('prayas_sarvam_key', document.getElementById('localSarvamKey').value.trim());
+  localStorage.setItem('prayas_mock_mode', document.getElementById('useMockMode').checked ? 'true' : 'false');
+  toast(STR[lang].toastSaved);
+  document.getElementById('settingsModal').classList.remove('show');
+}
+
+function getApiConfig() {
+  return {
+    geminiKey: localStorage.getItem('prayas_gemini_key') || '',
+    sarvamKey: localStorage.getItem('prayas_sarvam_key') || '',
+    useMock: localStorage.getItem('prayas_mock_mode') === 'true'
+  };
+}
+
+// Wire up settings buttons
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  loadLocalConfig();
+  document.getElementById('settingsModal').classList.add('show');
+});
+document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+  document.getElementById('settingsModal').classList.remove('show');
+});
+document.getElementById('saveSettingsBtn').addEventListener('click', saveLocalConfig);
+
+/* ================= Navigation & Toast ================= */
 function goTo(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
@@ -565,13 +1095,143 @@ function toast(msg, ms=2600){
   window._toastTimer = setTimeout(()=>t.classList.remove('show'), ms);
 }
 
-/* ================= Language toggle ================= */
-document.getElementById('langBtn').addEventListener('click', ()=>{
-  lang = lang==='hi' ? 'en' : 'hi';
-  document.getElementById('langBtn').textContent = lang==='hi' ? 'हिंदी' : 'English';
+/* ================= Update UI Language Helper ================= */
+function updateUILanguage() {
+  // Update static elements
   document.getElementById('taglineText').textContent = STR[lang].tagline;
   document.getElementById('heroLabel').textContent = STR[lang].heroLabel;
   document.getElementById('micHint').textContent = STR[lang].micHint;
+  document.getElementById('manualQueryBtn').textContent = STR[lang].btnText;
+  document.getElementById('manualQueryInput').placeholder = STR[lang].placeholder;
+  
+  // Topbar and PWA
+  const installBannerText = document.getElementById('installBannerText');
+  if (installBannerText) installBannerText.textContent = STR[lang].pwaText;
+  const installBtn = document.getElementById('installBtn');
+  if (installBtn) installBtn.textContent = STR[lang].pwaBtn;
+
+  // Bottom Nav
+  document.getElementById('navHome').textContent = STR[lang].navHome;
+  document.getElementById('navScan').textContent = STR[lang].navScan;
+  document.getElementById('navMap').textContent = STR[lang].navMap;
+  document.getElementById('navPrices').textContent = STR[lang].navPrices;
+  document.getElementById('navAlerts').textContent = STR[lang].navAlerts;
+
+  // IoT Sensors Section
+  document.getElementById('iotTitle').textContent = STR[lang].iotTitle;
+  document.getElementById('iotTrapLabel').textContent = STR[lang].iotTrap;
+  document.getElementById('iotSoilLabel').textContent = STR[lang].iotSoil;
+  document.getElementById('iotWetnessLabel').textContent = STR[lang].iotWetness;
+  document.getElementById('refreshSensorsBtn').textContent = STR[lang].iotRefreshBtn;
+
+  // Weather & Disease forecast Card
+  document.getElementById('weatherTitle').textContent = STR[lang].weatherTitle;
+  document.getElementById('lblLateBlight').textContent = STR[lang].riskLateBlight;
+  document.getElementById('lblPowderyMildew').textContent = STR[lang].riskPowderyMildew;
+  document.getElementById('lblStemBorer').textContent = STR[lang].riskStemBorer;
+
+  // Weather Location & Forecast Sub
+  document.getElementById('weatherForecastSub').textContent = STR[lang].weatherForecast;
+  document.getElementById('weatherLocationBadge').textContent = STR[lang].weatherLocation;
+
+  // Alert Banner
+  document.getElementById('topAlertTitle').textContent = STR[lang].alertBannerTitle;
+  document.getElementById('topAlertSub').textContent = STR[lang].alertBannerSub;
+
+  // Quick Services
+  document.getElementById('servicesTitle').textContent = STR[lang].servicesTitle;
+  document.getElementById('serviceScanTitle').textContent = STR[lang].serviceScanTitle;
+  document.getElementById('serviceScanSub').textContent = STR[lang].serviceScanSub;
+  document.getElementById('serviceMapTitle').textContent = STR[lang].serviceMapTitle;
+  document.getElementById('serviceMapSub').textContent = STR[lang].serviceMapSub;
+  document.getElementById('servicePricesTitle').textContent = STR[lang].servicePricesTitle;
+  document.getElementById('servicePricesSub').textContent = STR[lang].servicePricesSub;
+  document.getElementById('serviceAlertsTitle').textContent = STR[lang].serviceAlertsTitle;
+  document.getElementById('serviceAlertsSub').textContent = STR[lang].serviceAlertsSub;
+  document.getElementById('serviceExpertTitle').textContent = STR[lang].serviceExpertTitle;
+  document.getElementById('serviceExpertSub').textContent = STR[lang].serviceExpertSub;
+
+  // Activity Section
+  document.getElementById('activityTitle').textContent = STR[lang].activityTitle;
+
+  // Scan Screen
+  document.getElementById('scanTitle').textContent = STR[lang].scanTitle;
+  document.getElementById('scanSub').textContent = STR[lang].scanSub;
+  document.getElementById('scanUploadText').textContent = STR[lang].scanUploadText;
+  document.getElementById('scanCameraText').textContent = STR[lang].scanCameraText;
+  document.getElementById('scanWarningNote').textContent = STR[lang].scanWarningNote;
+  document.getElementById('scanUncertainText').textContent = STR[lang].scanUncertainText;
+  document.getElementById('retakeBtn').textContent = STR[lang].scanRetakeBtn;
+  document.getElementById('sendExpertBtn').textContent = STR[lang].scanSendExpertBtn;
+  document.getElementById('alertNearbyBtn').textContent = STR[lang].scanAddReportBtn;
+  document.getElementById('privacyNote').textContent = STR[lang].scanPrivacyNote;
+  document.getElementById('rescanBtn').textContent = STR[lang].scanRescanBtn;
+  document.getElementById('scanFollowupTitle').textContent = STR[lang].scanFollowupTitle;
+  document.getElementById('btnFollowupBetter').textContent = STR[lang].scanFollowupBetter;
+  document.getElementById('btnFollowupSame').textContent = STR[lang].scanFollowupSame;
+  document.getElementById('btnFollowupWorse').textContent = STR[lang].scanFollowupWorse;
+  document.getElementById('followupThanks').textContent = STR[lang].scanFollowupThanks;
+
+  // Map Screen
+  document.getElementById('mapTitle').textContent = STR[lang].mapTitle;
+  document.getElementById('mapSub').textContent = STR[lang].mapSub;
+  document.getElementById('mapReportsStat').textContent = STR[lang].mapReportsStat;
+  document.getElementById('mapHotspotsStat').textContent = STR[lang].mapHotspotsStat;
+  document.getElementById('mapFarmersStat').textContent = STR[lang].mapFarmersStat;
+  
+  // Re-render legend dynamically
+  const mapLegend = document.getElementById('mapLegend');
+  if (mapLegend) {
+    mapLegend.innerHTML = `
+      <span><i style="background:var(--green);"></i> ${STR[lang].mapLegendGreen}</span>
+      <span><i style="background:var(--yellow);"></i> ${STR[lang].mapLegendYellow}</span>
+      <span><i style="background:var(--orange);"></i> ${STR[lang].mapLegendOrange}</span>
+      <span><i style="background:var(--red);"></i> ${STR[lang].mapLegendRed}</span>
+    `;
+  }
+
+  // Prices Screen
+  document.getElementById('pricesTitle').textContent = STR[lang].pricesTitle;
+  document.getElementById('pricesSub').textContent = STR[lang].pricesSub;
+
+  // WhatsApp Screen
+  document.getElementById('waTitle').textContent = STR[lang].waTitle;
+  document.getElementById('waSub').textContent = STR[lang].waSub;
+  document.getElementById('waBotStatus').textContent = STR[lang].waBotStatus;
+  document.getElementById('waInitialMsg').innerHTML = STR[lang].waInitialMsg;
+  document.getElementById('waInputText').textContent = STR[lang].waInputPlaceholder;
+  document.getElementById('waAlertsTitle').textContent = STR[lang].waAlertsTitle;
+
+  // Expert Screen
+  document.getElementById('expertTitle').textContent = STR[lang].expertTitle;
+  document.getElementById('expertSub').textContent = STR[lang].expertSub;
+
+  // Dynamic UI re-renderers
+  updateNet();
+  syncSensors();
+  computeWeatherRisks(27, 92);
+  renderFeed();
+  renderCropChips();
+  renderPrices();
+  renderExpertCases();
+  if (window._map) {
+    rebindMapPopups();
+  }
+}
+
+/* ================= Language toggle ================= */
+document.getElementById('langBtn').addEventListener('click', ()=>{
+  if(lang === 'hi') {
+    lang = 'mr';
+    document.getElementById('langBtn').textContent = 'मराठी';
+  } else if(lang === 'mr') {
+    lang = 'en';
+    document.getElementById('langBtn').textContent = 'English';
+  } else {
+    lang = 'hi';
+    document.getElementById('langBtn').textContent = 'हिंदी';
+  }
+  updateUILanguage();
 });
 
 /* ================= Network status ================= */
@@ -579,8 +1239,8 @@ function updateNet(){
   const online = navigator.onLine;
   document.getElementById('netDot').classList.toggle('off', !online);
   document.getElementById('netText').textContent = online
-    ? "Online · Ghaziabad, UP · 3 farmers nearby reporting"
-    : "Offline mode · showing last synced data · will sync when online";
+    ? (lang === 'hi' ? "ऑनलाइन · नासिक, महाराष्ट्र · 3 किसान रिपोर्ट कर रहे हैं" : (lang === 'mr' ? "ऑनलाइन · नाशिक, महाराष्ट्र · ३ शेतकरी रिपोर्ट करत आहेत" : "Online · Nashik, Maharashtra · 3 farmers reporting"))
+    : (lang === 'hi' ? "ऑफलाइन मोड · कैश्ड डेटा दिखा रहा है · ऑनलाइन होने पर सिंक करें" : (lang === 'mr' ? "ऑफलाइन मोड · कॅश केलेला डेटा दाखवत आहे · ऑनलाइन झाल्यावर सिंक करा" : "Offline mode · showing cached data · sync when online"));
 }
 window.addEventListener('online', updateNet);
 window.addEventListener('offline', updateNet);
@@ -588,21 +1248,23 @@ updateNet();
 
 /* ================= Notifications ================= */
 document.getElementById('bellBtn').addEventListener('click', async ()=>{
-  if(!('Notification' in window)){ toast('इस ब्राउज़र में सूचनाएँ उपलब्ध नहीं हैं'); return; }
+  if(!('Notification' in window)){ toast('Notifications are not supported in this browser'); return; }
   let perm = Notification.permission;
   if(perm === 'default') perm = await Notification.requestPermission();
   if(perm === 'granted'){
-    toast('✅ सूचनाएँ चालू — टेस्ट अलर्ट भेजा जा रहा है');
+    toast(lang === 'en' ? '✅ Notifications active — test alert triggered' : (lang === 'mr' ? '✅ सूचना सक्रिय — चाचणी अलर्ट पाठवला' : '✅ सूचना सक्रिय — टेस्ट अलर्ट भेजा गया'));
     setTimeout(()=>{
       try{
-        new Notification('Prayas AI — नया अलर्ट', {
-          body: 'आपके 3km में झुलसा रोग की 2 नई रिपोर्ट। नक्शा देखें।',
+        const title = lang === 'en' ? 'Prayas AI — New Alert' : (lang === 'mr' ? 'Prayas AI — नवीन अलर्ट' : 'Prayas AI — नया अलर्ट');
+        const body = lang === 'en' ? 'Late Blight infection found in your 3km area.' : (lang === 'mr' ? 'तुमच्या ३ किमी परिसरामध्ये पानांवरील करपा रोगाचे संक्रमण आढळले आहे.' : 'आपके 3 किमी क्षेत्र में पत्ता झुलसा रोग का संक्रमण पाया गया है.');
+        new Notification(title, {
+          body: body,
           icon:'icons/icon.svg'
         });
-      }catch(e){ toast('अलर्ट भेजा गया (डिवाइस सेटिंग जाँचें)'); }
+      }catch(e){ toast('Alert sent (check system settings)'); }
     }, 900);
   } else {
-    toast('सूचनाओं की अनुमति नहीं मिली');
+    toast('Notification permission denied');
   }
 });
 
@@ -624,8 +1286,133 @@ if('serviceWorker' in navigator){
   });
 }
 
-/* ================= Voice: Speech Recognition + Synthesis ================= */
-const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+/* ================= IoT Sensors & Pest Trap Simulation ================= */
+const sensorVals = {
+  trap_count: 14,
+  soil_moisture: 32,
+  leaf_wetness: 82
+};
+
+async function syncSensors() {
+  try {
+    const config = getApiConfig();
+    let data;
+    if (config.useMock) {
+      data = sensorVals;
+    } else {
+      const res = await fetch('/api/database?type=sensors');
+      if (res.ok) {
+        const history = await res.json();
+        data = history[0] || sensorVals;
+      } else {
+        data = sensorVals;
+      }
+    }
+    
+    // Update DOM
+    document.getElementById('sensorTrapCount').textContent = `${data.trap_count} ${STR[lang].iotPestsUnit}`;
+    document.getElementById('sensorSoilMoisture').textContent = `${data.soil_moisture}% (${data.soil_moisture < 35 ? STR[lang].iotDry : STR[lang].iotWet})`;
+    document.getElementById('sensorLeafWetness').textContent = `${data.leaf_wetness}% (${data.leaf_wetness > 75 ? STR[lang].iotHigh : STR[lang].iotNormal})`;
+
+    const trapBadge = document.getElementById('sensorTrapStatus');
+    if (data.trap_count > 20) {
+      trapBadge.className = "conf-badge high";
+      trapBadge.textContent = STR[lang].iotDanger + " (High)";
+    } else {
+      trapBadge.className = "conf-badge med";
+      trapBadge.textContent = STR[lang].iotAlert + " (Alert)";
+    }
+
+    const soilBadge = document.getElementById('sensorSoilStatus');
+    if (data.soil_moisture < 35) {
+      soilBadge.className = "conf-badge high";
+      soilBadge.textContent = STR[lang].iotIrrigationNeeded;
+    } else {
+      soilBadge.className = "conf-badge green";
+      soilBadge.style.color = "var(--green)";
+      soilBadge.style.background = "#E4F1E8";
+      soilBadge.textContent = STR[lang].iotSufficientMoisture;
+    }
+
+    const wetBadge = document.getElementById('sensorWetnessStatus');
+    if (data.leaf_wetness > 75) {
+      wetBadge.className = "conf-badge high";
+      wetBadge.textContent = STR[lang].iotInfectionRisk;
+    } else {
+      wetBadge.className = "conf-badge green";
+      wetBadge.style.color = "var(--green)";
+      wetBadge.style.background = "#E4F1E8";
+      wetBadge.textContent = STR[lang].iotSafe;
+    }
+  } catch (err) {
+    console.warn("Failed syncing sensors: ", err);
+  }
+}
+
+document.getElementById('refreshSensorsBtn').addEventListener('click', async () => {
+  sensorVals.trap_count = 10 + Math.floor(Math.random() * 25);
+  sensorVals.soil_moisture = 20 + Math.floor(Math.random() * 40);
+  sensorVals.leaf_wetness = 50 + Math.floor(Math.random() * 45);
+
+  const config = getApiConfig();
+  if (!config.useMock) {
+    try {
+      await fetch('/api/database?type=sensors', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sensorVals)
+      });
+    } catch(e) {}
+  }
+  await syncSensors();
+  toast(lang === 'en' ? "🛰️ Sensor registers updated" : (lang === 'mr' ? "🛰️ सेन्सर नोंदणी अद्ययावत केली" : "🛰️ सेंसर रजिस्टर अपडेट किए गए"));
+});
+
+window.addEventListener('load', syncSensors);
+
+/* ================= Weather Risk Logic ================= */
+function computeWeatherRisks(temp, humidity) {
+  let lateBlight = "कम (Low)";
+  let powderyMildew = "कम (Low)";
+  let stemBorer = "कम (Low)";
+
+  if (humidity > 85 && temp < 30) {
+    lateBlight = "उच्च (High Risk)";
+  } else if (humidity > 70) {
+    lateBlight = "मध्यम (Medium)";
+  }
+
+  if (humidity < 60 && temp > 28) {
+    powderyMildew = "उच्च (High Risk)";
+  } else if (temp > 25) {
+    powderyMildew = "मध्यम (Medium)";
+  }
+
+  if (temp > 26 && humidity > 75) {
+    stemBorer = "उच्च (High Risk)";
+  } else if (temp > 22) {
+    stemBorer = "मध्यम (Medium)";
+  }
+
+  document.getElementById('riskLateBlight').textContent = lateBlight;
+  document.getElementById('riskLateBlight').className = lateBlight.includes("उच्च") ? "red" : (lateBlight.includes("मध्यम") ? "orange" : "green");
+  document.getElementById('riskLateBlight').style.color = lateBlight.includes("उच्च") ? "var(--red)" : (lateBlight.includes("मध्यम") ? "var(--turmeric-deep)" : "var(--green)");
+
+  document.getElementById('riskPowderyMildew').textContent = powderyMildew;
+  document.getElementById('riskPowderyMildew').className = powderyMildew.includes("उच्च") ? "red" : (powderyMildew.includes("मध्यम") ? "orange" : "green");
+  document.getElementById('riskPowderyMildew').style.color = powderyMildew.includes("उच्च") ? "var(--red)" : (powderyMildew.includes("मध्यम") ? "var(--turmeric-deep)" : "var(--green)");
+
+  document.getElementById('riskStemBorer').textContent = stemBorer;
+  document.getElementById('riskStemBorer').className = stemBorer.includes("उच्च") ? "red" : (stemBorer.includes("मध्यम") ? "orange" : "green");
+  document.getElementById('riskStemBorer').style.color = stemBorer.includes("उच्च") ? "var(--red)" : (stemBorer.includes("मध्यम") ? "var(--turmeric-deep)" : "var(--green)");
+}
+window.addEventListener('load', () => computeWeatherRisks(27, 92));
+
+/* ================= Voice Helper: Recording + STT / TTS ================= */
+let mediaRecorder;
+let audioChunks = [];
+let voiceRecordingActive = false;
+
 const micBtn = document.getElementById('micBtn');
 const heroTranscript = document.getElementById('heroTranscript');
 const transcriptText = document.getElementById('transcriptText');
@@ -633,120 +1420,364 @@ const heroReply = document.getElementById('heroReply');
 const replyText = document.getElementById('replyText');
 const micHint = document.getElementById('micHint');
 
-function speak(text){
+// Fallback TTS speak using Web Speech API
+function speakBrowser(text){
   if(!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   const voices = window.speechSynthesis.getVoices();
-  const hiVoice = voices.find(v=>v.lang && v.lang.toLowerCase().includes('hi'));
-  if(hiVoice) u.voice = hiVoice;
-  u.lang = hiVoice ? hiVoice.lang : 'hi-IN';
+  const matchedVoice = voices.find(v=>v.lang && v.lang.toLowerCase().includes(lang === 'hi' ? 'hi' : (lang === 'mr' ? 'mr' : 'en')));
+  u.lang = matchedVoice ? matchedVoice.lang : (lang === 'hi' ? 'hi-IN' : (lang === 'mr' ? 'mr-IN' : 'en-US'));
   u.rate = 0.95;
   window.speechSynthesis.speak(u);
 }
-document.getElementById('speakAgainBtn').addEventListener('click', ()=>speak(replyText.textContent));
 
-function craftReply(q){
-  const t = q.toLowerCase();
-  if(t.includes('भाव') || t.includes('दाम') || t.includes('price') || t.includes('mandi')){
-    return "आज सबसे अच्छा भाव मोदीनगर मंडी में है — ₹2,140/क्विंटल गेहूं (भाड़ा घटाकर)। 'भाव' टैब में पूरी सूची देखें।";
-  }
-  if(t.includes('रोग') || t.includes('कीट') || t.includes('disease') || t.includes('pest') || t.includes('पत्ता')){
-    return "आपके 4km क्षेत्र में पत्ता झुलसा रोग की 12 रिपोर्ट मिली हैं। नीम तेल (5ml/लीटर) का छिड़काव करें और नक्शा टैब में हॉटस्पॉट देखें।";
-  }
-  if(t.includes('मौसम') || t.includes('बारिश') || t.includes('weather') || t.includes('rain')){
-    return "अगले 2 दिन हल्की बारिश की संभावना है। छिड़काव आज शाम से पहले पूरा कर लें।";
-  }
-  return "मैंने आपकी बात सुन ली। फ़सल स्कैन के लिए 'स्कैन' टैब खोलें, या मंडी भाव के लिए 'भाव' टैब देखें।";
-}
-
-let recognizing = false;
-let recognizer = null;
-if(SpeechRec){
-  recognizer = new SpeechRec();
-  recognizer.lang = 'hi-IN';
-  recognizer.interimResults = false;
-  recognizer.maxAlternatives = 1;
-
-  recognizer.onstart = ()=>{
-    recognizing = true;
-    micBtn.classList.add('listening');
-    micHint.textContent = STR[lang].listening;
-  };
-  recognizer.onend = ()=>{
-    recognizing = false;
-    micBtn.classList.remove('listening');
-    micHint.textContent = STR[lang].micHint;
-  };
-  recognizer.onerror = (e)=>{
-    recognizing = false;
-    micBtn.classList.remove('listening');
-    micHint.textContent = STR[lang].micHint;
-    toast('माइक अनुमति दें या टेक्स्ट में टाइप करें (demo: ' + (e.error||'error') + ')');
-  };
-  recognizer.onresult = (e)=>{
-    const said = e.results[0][0].transcript;
-    transcriptText.textContent = said;
-    heroTranscript.classList.add('show');
-    const reply = craftReply(said);
-    replyText.textContent = reply;
-    heroReply.style.display = 'block';
-    speak(reply);
-    addFeedItem({title:'आपकी क्वेरी दर्ज हुई', desc: said, level:'low'});
-  };
-}
-
-micBtn.addEventListener('click', ()=>{
-  if(!SpeechRec){
-    // Fallback demo path when browser has no speech API
-    const demoQ = "मेरी गेहूं की फ़सल में भाव कितना है?";
-    transcriptText.textContent = demoQ;
-    heroTranscript.classList.add('show');
-    const reply = craftReply(demoQ);
-    replyText.textContent = reply;
-    heroReply.style.display = 'block';
-    speak(reply);
-    toast('इस ब्राउज़र में वॉइस इनपुट सीमित है — डेमो जवाब दिखाया गया');
-    return;
-  }
-  if(recognizing){ recognizer.stop(); return; }
-  try{ recognizer.start(); }catch(e){ /* already started */ }
+document.getElementById('speakAgainBtn').addEventListener('click', () => {
+  const replyStr = replyText.textContent;
+  synthesizeAndPlayTTS(replyStr);
 });
 
-/* ================= Home feed ================= */
+async function playBase64Audio(base64Data) {
+  try {
+    const audioUrl = `data:audio/mp3;base64,${base64Data}`;
+    const audio = new Audio(audioUrl);
+    await audio.play();
+  } catch (err) {
+    console.warn("Base64 audio playback failed, fallback to native speech.", err);
+  }
+}
+
+// Call Serverless TTS / Direct TTS
+async function synthesizeAndPlayTTS(textPayload) {
+  const config = getApiConfig();
+  const langCode = lang === 'hi' ? 'hi-IN' : (lang === 'mr' ? 'mr-IN' : 'en-IN');
+
+  if (config.useMock) {
+    speakBrowser(textPayload);
+    return;
+  }
+
+  try {
+    let audioBase64 = '';
+    if (config.sarvamKey) {
+      // Direct call
+      let speaker = lang === 'mr' ? "ananya" : "shubh";
+      const res = await fetch("https://api.sarvam.ai/text-to-speech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-subscription-key": config.sarvamKey
+        },
+        body: JSON.stringify({ text: textPayload, language_code: langCode, speaker, model: "bulbul:v3" })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        audioBase64 = json.audio;
+      }
+    } else {
+      // Serverless Proxy call
+      const res = await fetch("/api/sarvam-tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textPayload, language_code: langCode })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        audioBase64 = json.audio;
+      }
+    }
+
+    if (audioBase64) {
+      playBase64Audio(audioBase64);
+    } else {
+      speakBrowser(textPayload);
+    }
+  } catch (err) {
+    console.warn("TTS call failed, fallback to browser speech: ", err);
+    speakBrowser(textPayload);
+  }
+}
+
+// Call Serverless STT / Direct STT
+// Call Serverless STT / Direct STT
+async function transcribeAudio(base64Audio) {
+  const config = getApiConfig();
+  if (config.useMock) {
+    return lang === 'en' ? "What is the medicine for late blight in tomato?" : (lang === 'mr' ? "टोमॅटोमधील करपा रोगावर औषध काय आहे?" : "गेहूं में पत्ता झुलसा रोग की दवा क्या है?");
+  }
+
+  try {
+    if (config.sarvamKey) {
+      const formData = new FormData();
+      const audioBuffer = Uint8Array.from(atob(base64Audio), c => c.charCodeAt(0));
+      const blob = new Blob([audioBuffer], { type: "audio/wav" });
+      formData.append("file", blob, "audio.wav");
+      formData.append("model", "saaras:v3");
+
+      const res = await fetch("https://api.sarvam.ai/speech-to-text", {
+        method: "POST",
+        headers: { "api-subscription-key": config.sarvamKey },
+        body: formData
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.transcript || "";
+      }
+    } else {
+      const res = await fetch("/api/sarvam-stt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audio: base64Audio, mimeType: "audio/wav" })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.transcript || "";
+      }
+    }
+  } catch (e) {
+    console.warn("STT transcription failure, fallback text used.", e);
+  }
+  return lang === 'en' ? "Tomato leaves are turning yellow" : (lang === 'mr' ? "टोमॅटोची पाने पिवळी पडत आहेत" : "टमाटर के पत्ते पीले पड़ रहे हैं");
+}
+
+function handleVoiceInput(saidText) {
+  transcriptText.textContent = saidText;
+  heroTranscript.classList.add('show');
+  
+  const reply = craftQueryReply(saidText);
+  replyText.textContent = reply;
+  heroReply.style.display = 'block';
+  synthesizeAndPlayTTS(reply);
+  addFeedItem({ type: 'voice_query', desc: saidText, level: 'low' });
+}
+
+function craftQueryReply(q) {
+  const t = q.toLowerCase();
+  if (lang === 'en') {
+    if (t.includes('price') || t.includes('rate') || t.includes('mandi') || t.includes('cost') || t.includes('market')) {
+      return "Today, the best net rate is at Pimplagaon Mandi — ₹2,140 per quintal of Tomato (adjusted for freight). Check the Mandi Prices tab for the full list.";
+    }
+    if (t.includes('disease') || t.includes('pest') || t.includes('blight') || t.includes('leaf') || t.includes('insect') || t.includes('bug')) {
+      return "There are 12 reports of Late Blight in your Nashik region. Spray organic Neem Oil (5ml/liter) for safety. Check the Risk Map tab.";
+    }
+    if (t.includes('weather') || t.includes('rain') || t.includes('temp') || t.includes('forecast')) {
+      return "Light rain is expected in Nashik over the next 2 days. Complete spraying before this evening.";
+    }
+    return "I received your query. Open 'Scan' to diagnose a crop or 'Prices' to view Mandi returns.";
+  } else if (lang === 'mr') {
+    if (t.includes('भाव') || t.includes('दर') || t.includes('बाजार') || t.includes('पैसा') || t.includes('मंडी')) {
+      return "आज सर्वात चांगला भाव पिंपळगाव बाजार समितीमध्ये आहे — ₹२,१४० प्रति क्विंटल टोमॅटो (वाहतूक वजा करून). सविस्तर यादीसाठी 'बाजार भाव' टॅब पहा.";
+    }
+    if (t.includes('रोग') || t.includes('कीड') || t.includes('करपा') || t.includes('पान') || t.includes('किड')) {
+      return "तुमच्या नाशिक परिसरामध्ये पानांवरील करपा रोगाचे १२ रिपोर्ट मिळाले आहेत. सुरक्षिततेसाठी कडुनिंब तेल (५ मिली/लीटर) फवारणी करा. जोखीम नकाशा टॅब पहा.";
+    }
+    if (t.includes('हवामान') || t.includes('पाऊस') || t.includes('ढग') || t.includes('अंदाज')) {
+      return "नाशिकमध्ये पुढील २ दिवसांत हलक्या पावसाची शक्यता आहे. फवारणी आज संध्याकाळपूर्वी पूर्ण करा.";
+    }
+    return "मी तुमचे ऐकले आहे. पीक स्कॅनसाठी 'स्कॅन' टॅब किंवा बाजार भावासाठी 'बाजार भाव' टॅब उघडा.";
+  } else {
+    // Hindi default
+    if (t.includes('भाव') || t.includes('दाम') || t.includes('price') || t.includes('बाजार') || t.includes('दर')) {
+      return "आज सबसे अच्छा भाव पिंपलगांव मंडी में है — ₹2,140 प्रति क्विंटल टमाटर (भाड़ा घटाकर)। 'मंडी भाव' टैब में पूरी सूची देखें।";
+    }
+    if (t.includes('रोग') || t.includes('कीट') || t.includes('disease') || t.includes('pest') || t.includes('पत्ता') || t.includes('झुलसा')) {
+      return "आपके नासिक क्षेत्र में पत्ता झुलसा रोग की 12 रिपोर्ट मिली हैं। सुरक्षा के लिए जैविक नीम तेल (5ml/लीटर) का छिड़काव करें। जोखिम नक्शा टैब देखें।";
+    }
+    if (t.includes('मौसम') || t.includes('बारिश') || t.includes('weather') || t.includes('rain')) {
+      return "अगले 2 दिन नासिक में हल्की बारिश की संभावना है। छिड़काव आज शाम से पहले पूरा कर लें।";
+    }
+    return "मैंने आपकी बात सुन ली। फ़सल स्कैन के लिए 'स्कैन' टैब खोलें, या मंडी भाव के लिए 'मंडी भाव' टैब देखें।";
+  }
+}
+
+// Audio Recording trigger
+async function toggleRecording() {
+  if (voiceRecordingActive) {
+    // Stop recording
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    voiceRecordingActive = false;
+    micBtn.classList.remove('listening');
+    micHint.textContent = STR[lang].micHint;
+  } else {
+    // Start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Audio = reader.result.split(',')[1];
+          toast(lang === 'en' ? "🎙️ Recording finished. Transcribing..." : (lang === 'mr' ? "🎙️ रेकॉर्डिंग पूर्ण. भाषांतर होत आहे..." : "🎙️ रिकॉर्डिंग पूर्ण. आवाज का अनुवाद हो रहा है..."));
+          const text = await transcribeAudio(base64Audio);
+          handleVoiceInput(text);
+        };
+        reader.readAsDataURL(audioBlob);
+      };
+
+      mediaRecorder.start();
+      voiceRecordingActive = true;
+      micBtn.classList.add('listening');
+      micHint.textContent = STR[lang].listening;
+    } catch (err) {
+      console.warn("Microphone not accessible, running browser demo fallback", err);
+      toast(lang === 'en' ? "Mic unavailable — demo query initiated" : (lang === 'mr' ? "माईक उपलब्ध नाही — डेमो क्वेरी चालविली" : "माइक उपलब्ध नहीं है — डेमो क्वेरी चलाई जा रही है"));
+      const demoQ = lang === 'en' ? "tomato leaves blight medicine help" : (lang === 'mr' ? "टोमॅटो पानांवर करपा औषध सांगा" : "टमाटर के पत्ते झुलस रहे हैं दवा बताएं");
+      handleVoiceInput(demoQ);
+    }
+  }
+}
+
+micBtn.addEventListener('click', toggleRecording);
+
+// Manual type query helper
+document.getElementById('manualQueryBtn').addEventListener('click', () => {
+  const textVal = document.getElementById('manualQueryInput').value.trim();
+  if (textVal) {
+    handleVoiceInput(textVal);
+    document.getElementById('manualQueryInput').value = '';
+  }
+});
+
+/* ================= Home Feed database persistent state ================= */
 const homeFeed = document.getElementById('homeFeed');
 const alertsFullList = document.getElementById('alertsFullList');
+
+const FEED_TEMPLATES = {
+  hi: [
+    {title:'झुलसा रोग रिपोर्ट — रामपुर खेत, नासिक', desc:'सोहन कुमार · 20 मिनट पहले · फ़ोटो पुष्टि'},
+    {title:'टमाटर भाव अपडेट', desc:'पिंपलगांव मंडी +₹40/क्विंटल · 1 घंटा पहले'},
+    {title:'तना छेदक कीट चेतावनी', desc:'3.2km दूर · मध्यम जोखिम · 5 रिपोर्ट'},
+    {title:'मौसम अपडेट', desc:'कल नासिक जिले में मध्यम बारिश की संभावना — छिड़काव समय पर करें'},
+  ],
+  mr: [
+    {title:'करपा रोग अहवाल — रामपूर शेत, नाशिक', desc:'सोहन कुमार · २० मिनिटांपूर्वी · फोटो पडताळणी'},
+    {title:'टोमॅटो भाव अपडेट', desc:'पिंपळगाव बाजार समिती +₹४०/क्विंटल · १ तासापूर्वी'},
+    {title:'खोडकिडा चेतावणी', desc:'३.२ किमी दूर · मध्यम जोखीम · ५ रिपोर्ट'},
+    {title:'हवामान अपडेट', desc:'उद्या नाशिक जिल्ह्यात मध्यम पावसाची शक्यता — वेळेवर फवारणी करा'},
+  ],
+  en: [
+    {title:'Late Blight Report — Rampur Farm, Nashik', desc:'Sohan Kumar · 20 mins ago · Photo Verified'},
+    {title:'Tomato Price Update', desc:'Pimplagaon Mandi +₹40/quintal · 1 hour ago'},
+    {title:'Stem Borer Warning', desc:'3.2km away · Medium Risk · 5 reports'},
+    {title:'Weather Update', desc:'Moderate rain expected in Nashik district tomorrow — spray on time'},
+  ]
+};
+
 let feedData = [
-  {title:'झुलसा रोग रिपोर्ट — रामपुर खेत', desc:'सोहन कुमार · 20 मिनट पहले · 6 फ़ोटो पुष्टि', level:'high'},
-  {title:'गेहूं भाव अपडेट', desc:'मोदीनगर मंडी +₹40/क्विंटल · 1 घंटा पहले', level:'low'},
-  {title:'तना छेदक कीट चेतावनी', desc:'2.8km दूर · मध्यम जोखिम · 5 रिपोर्ट', level:'med'},
-  {title:'मौसम अपडेट', desc:'कल हल्की बारिश की संभावना — छिड़काव समय पर करें', level:'low'},
+  {type: 'seed_0', level: 'high'},
+  {type: 'seed_1', level: 'low'},
+  {type: 'seed_2', level: 'med'},
+  {type: 'seed_3', level: 'low'},
 ];
+
+async function loadFeed() {
+  const config = getApiConfig();
+  if (!config.useMock) {
+    try {
+      const res = await fetch('/api/database?type=reports');
+      if (res.ok) {
+        const reports = await res.json();
+        // format server database reports to feed items
+        const dbItems = reports.map(r => ({
+          type: 'scan_report_logged',
+          disease: r.disease,
+          crop: r.crop,
+          confPct: r.confPct,
+          level: r.conf === 'high' ? 'high' : (r.conf === 'med' ? 'med' : 'low')
+        }));
+        feedData = [...dbItems, ...feedData];
+      }
+    } catch(e) {}
+  }
+  renderFeed();
+}
+
 function addFeedItem(item){
   feedData.unshift(item);
   renderFeed();
 }
-function renderFeed(){
-  homeFeed.innerHTML = feedData.slice(0,6).map(f=>`
-    <div class="feed-item">
-      <div class="feed-dot ${f.level==='high'?'high':f.level==='med'?'med':'low'}"></div>
-      <div>
-        <div class="feed-t">${f.title}</div>
-        <div class="feed-d">${f.desc}</div>
-      </div>
-    </div>`).join('');
-  alertsFullList.innerHTML = feedData.map(f=>`
-    <div class="alert-list-item">
-      <div class="ic" style="background:${f.level==='high'?'#FBE4E0':f.level==='med'?'#FCEBD9':'#E4F1E8'}; color:${f.level==='high'?'var(--red)':f.level==='med'?'var(--turmeric-deep)':'var(--leaf)'};">${f.level==='high'?'🔴':f.level==='med'?'🟠':'🟢'}</div>
-      <div>
-        <div class="feed-t">${f.title}</div>
-        <div class="feed-d">${f.desc}</div>
-      </div>
-    </div>`).join('');
-}
-renderFeed();
 
-/* ================= Scan flow ================= */
+function renderFeed(){
+  homeFeed.innerHTML = feedData.slice(0,6).map(f => {
+    let title = "";
+    let desc = "";
+    if (f.type.startsWith('seed_')) {
+      const idx = parseInt(f.type.split('_')[1]);
+      title = FEED_TEMPLATES[lang][idx].title;
+      desc = FEED_TEMPLATES[lang][idx].desc;
+    } else if (f.type === 'voice_query') {
+      title = lang === 'en' ? 'Voice query recorded' : (lang === 'mr' ? 'व्हॉइस क्वेरी नोंदवली गेली' : 'आपकी वॉइस क्वेरी दर्ज हुई');
+      desc = f.desc;
+    } else if (f.type === 'scan_alert_sent') {
+      title = `${f.disease} — ${lang === 'en' ? 'Alert sent in area' : (lang === 'mr' ? 'क्षेत्रात अलर्ट पाठवला गेला' : 'क्षेत्र में अलर्ट भेजा गया')}`;
+      desc = lang === 'en' ? `${f.clusterCount} reports in 48h · Risk: ${f.tierLabel}` : (lang === 'mr' ? `४८ तासांत ${f.clusterCount} रिपोर्ट · जोखीम: ${f.tierLabel}` : `48 घंटे में ${f.clusterCount} रिपोर्ट · जोखिम: ${f.tierLabel}`);
+    } else if (f.type === 'scan_report_logged') {
+      title = `${f.disease} — ${lang === 'en' ? 'Your report was recorded' : (lang === 'mr' ? 'आपली रिपोर्ट नोंदवली गेली' : 'आपकी रिपोर्ट दर्ज हुई')}`;
+      desc = lang === 'en' ? 'Under monitoring · Alert not broadcast yet' : (lang === 'mr' ? 'निरीक्षणाखाली · अलर्ट पाठवला नाही' : 'निगरानी में · अभी अलर्ट नहीं भेजा गया');
+    } else if (f.type === 'expert_verified') {
+      title = `${f.disease} — ${lang === 'en' ? 'Expert Verified' : (lang === 'mr' ? 'तज्ज्ञांद्वारे सत्यापित' : 'विशेषज्ञ द्वारा सत्यापित')}`;
+      desc = `${f.village} · ${lang === 'en' ? 'High risk alert sent' : (lang === 'mr' ? 'उच्च जोखीम अलर्ट पाठवला गेला' : 'उच्च जोखिम अलर्ट भेजा गया')}`;
+    } else if (f.type === 'expert_escalated') {
+      title = lang === 'en' ? 'Case sent to expert' : (lang === 'mr' ? 'केस तज्ज्ञांकडे पाठवली' : 'केस विशेषज्ञ को भेजा गया');
+      desc = `${f.disease} · ${lang === 'en' ? 'Review pending' : (lang === 'mr' ? 'पुनरावलोकन प्रलंबित' : 'समीक्षा लंबित')}`;
+    }
+
+    return `
+      <div class="feed-item">
+        <div class="feed-dot ${f.level==='high'?'high':f.level==='med'?'med':'low'}"></div>
+        <div>
+          <div class="feed-t">${title}</div>
+          <div class="feed-d">${desc}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  alertsFullList.innerHTML = feedData.map(f => {
+    let title = "";
+    let desc = "";
+    if (f.type.startsWith('seed_')) {
+      const idx = parseInt(f.type.split('_')[1]);
+      title = FEED_TEMPLATES[lang][idx].title;
+      desc = FEED_TEMPLATES[lang][idx].desc;
+    } else if (f.type === 'voice_query') {
+      title = lang === 'en' ? 'Voice query recorded' : (lang === 'mr' ? 'व्हॉइस क्वेरी नोंदवली गेली' : 'आपकी वॉइस क्वेरी दर्ज हुई');
+      desc = f.desc;
+    } else if (f.type === 'scan_alert_sent') {
+      title = `${f.disease} — ${lang === 'en' ? 'Alert sent in area' : (lang === 'mr' ? 'क्षेत्रात अलर्ट पाठवला गेला' : 'क्षेत्र में अलर्ट भेजा गया')}`;
+      desc = lang === 'en' ? `${f.clusterCount} reports in 48h · Risk: ${f.tierLabel}` : (lang === 'mr' ? `४८ तासांत ${f.clusterCount} रिपोर्ट · जोखीम: ${f.tierLabel}` : `48 घंटे में ${f.clusterCount} रिपोर्ट · जोखिम: ${f.tierLabel}`);
+    } else if (f.type === 'scan_report_logged') {
+      title = `${f.disease} — ${lang === 'en' ? 'Your report was recorded' : (lang === 'mr' ? 'आपली रिपोर्ट नोंदवली गेली' : 'आपकी रिपोर्ट दर्ज हुई')}`;
+      desc = lang === 'en' ? 'Under monitoring · Alert not broadcast yet' : (lang === 'mr' ? 'निरीक्षणाखाली · अलर्ट पाठवला नाही' : 'निगरानी में · अभी अलर्ट नहीं भेजा गया');
+    } else if (f.type === 'expert_verified') {
+      title = `${f.disease} — ${lang === 'en' ? 'Expert Verified' : (lang === 'mr' ? 'तज्ज्ञांद्वारे सत्यापित' : 'विशेषज्ञ द्वारा सत्यापित')}`;
+      desc = `${f.village} · ${lang === 'en' ? 'High risk alert sent' : (lang === 'mr' ? 'उच्च जोखीम अलर्ट पाठवला गेला' : 'उच्च जोखिम अलर्ट भेजा गया')}`;
+    } else if (f.type === 'expert_escalated') {
+      title = lang === 'en' ? 'Case sent to expert' : (lang === 'mr' ? 'केस तज्ज्ञांकडे पाठवली' : 'केस विशेषज्ञ को भेजा गया');
+      desc = `${f.disease} · ${lang === 'en' ? 'Review pending' : (lang === 'mr' ? 'पुनरावलोकन प्रलंबित' : 'समीक्षा लंबित')}`;
+    }
+
+    return `
+      <div class="alert-list-item">
+        <div class="ic" style="background:${f.level==='high'?'#FBE4E0':f.level==='med'?'#FCEBD9':'#E4F1E8'}; color:${f.level==='high'?'var(--red)':f.level==='med'?'var(--turmeric-deep)':'var(--leaf)'};">${f.level==='high'?'🔴':f.level==='med'?'🟠':'🟢'}</div>
+        <div>
+          <div class="feed-t">${title}</div>
+          <div class="feed-d">${desc}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+window.addEventListener('load', loadFeed);
+
+/* ================= Scan Flow with real Gemini Call ================= */
 const scanDrop = document.getElementById('scanDrop');
 const scanFile = document.getElementById('scanFile');
 const previewWrap = document.getElementById('previewWrap');
@@ -754,60 +1785,92 @@ const previewCanvas = document.getElementById('previewCanvas');
 const scanOverlay = document.getElementById('scanOverlay');
 const resultCard = document.getElementById('resultCard');
 
-const DISEASE_DB = [
-  {
-    disease:'पत्ता झुलसा रोग (Late Blight)', crop:'टमाटर / आलू', conf:'high', confPct:'91%',
-    alt:'संभावित अन्य कारण: जीवाणु धब्बा रोग (कम संभावना)।',
-    plan:[
-      {k:'क्या करें', v:'मैनकोज़ेब 2g/लीटर पानी में घोलकर छिड़काव करें'},
-      {k:'कब करें', v:'आज शाम, बारिश से पहले'},
-      {k:'अनुमानित लागत', v:'₹180–220 प्रति एकड़'},
-      {k:'ज़रूरी सामान', v:'हैंड स्प्रेयर, मैनकोज़ेब 75% WP'},
-      {k:'सस्ता विकल्प', v:'नीम तेल 5ml/लीटर (हल्के संक्रमण में)'},
-      {k:'नज़दीकी स्रोत', v:'रामपुर बीज भंडार — 2.1 km'},
-      {k:'दोबारा जाँच', v:'3 दिन बाद'},
-    ]
-  },
-  {
-    disease:'चूर्णिल आसिता (Powdery Mildew)', crop:'सरसों / भिंडी', conf:'high', confPct:'88%',
-    alt:'संभावित अन्य कारण: धूल जमाव (बहुत कम संभावना)।',
-    plan:[
-      {k:'क्या करें', v:'सल्फर घोल (3g/लीटर) का छिड़काव करें'},
-      {k:'कब करें', v:'सुबह जल्दी, धूप तेज़ होने से पहले'},
-      {k:'अनुमानित लागत', v:'₹90–130 प्रति एकड़'},
-      {k:'ज़रूरी सामान', v:'सल्फर पाउडर, स्प्रेयर'},
-      {k:'सस्ता विकल्प', v:'छाछ घोल (1:10) — पारंपरिक उपाय'},
-      {k:'नज़दीकी स्रोत', v:'किसान सेवा केंद्र — 3.4 km'},
-      {k:'दोबारा जाँच', v:'4 दिन बाद'},
-    ]
-  },
-  {
-    disease:'तना छेदक कीट (Stem Borer) — संभावित', crop:'धान / गन्ना', conf:'med', confPct:'64%',
-    alt:'संभावित अन्य कारण: पत्ती लपेटक कीट, पोषण की कमी। तस्वीर में लक्षण स्पष्ट नहीं हैं।',
-    plan:[
-      {k:'क्या करें', v:'संक्रमित तने काटकर हटाएँ; कार्टेप हाइड्रोक्लोराइड 4G डालें'},
-      {k:'कब करें', v:'अगले 2 दिन में'},
-      {k:'अनुमानित लागत', v:'₹250–300 प्रति एकड़'},
-      {k:'ज़रूरी सामान', v:'कार्टेप 4G, दस्ताने'},
-      {k:'सस्ता विकल्प', v:'प्रकाश ट्रैप लगाएँ (लागत-मुक्त)'},
-      {k:'नज़दीकी स्रोत', v:'KVK मोदीनगर — 6 km'},
-      {k:'दोबारा जाँच', v:'2 दिन बाद'},
-    ]
-  },
-  {
-    disease:'स्वस्थ फ़सल', crop:'सामान्य जाँच', conf:'high', confPct:'95%',
-    alt:'कोई असामान्य लक्षण नहीं मिला।',
-    plan:[
-      {k:'क्या करें', v:'कोई कार्रवाई ज़रूरी नहीं — निगरानी जारी रखें'},
-      {k:'कब करें', v:'साप्ताहिक जाँच'},
-      {k:'अनुमानित लागत', v:'₹0'},
-      {k:'ज़रूरी सामान', v:'—'},
-      {k:'सस्ता विकल्प', v:'—'},
-      {k:'नज़दीकी स्रोत', v:'—'},
-      {k:'दोबारा जाँच', v:'7 दिन बाद'},
-    ]
-  },
-];
+const LOCAL_FALLBACK_DB = {
+  hi: [
+    {
+      disease:'पत्ता झुलसा रोग (Late Blight)', crop:'टमाटर / आलू', conf:'high', confPct:'91%',
+      alt:'संभावित अन्य कारण: जीवाणु धब्बा रोग (कम संभावना)।',
+      plan:[
+        {k:'Action', v:'रासायनिक नियंत्रण के लिए मैनकोज़ेब 2g/लीटर पानी में घोलकर छिड़काव करें'},
+        {k:'Timing', v:'आज शाम, बारिश शुरू होने से पहले'},
+        {k:'Cost', v:'₹180–220 प्रति एकड़'},
+        {k:'Required', v:'हैंड स्प्रेयर, मैनकोज़ेब 75% WP'},
+        {k:'Alternative', v:'नीम तेल 5ml/लीटर + साबुन का घोल (जैविक छिड़काव)'},
+        {k:'Source', v:'नासिक कृषि केंद्र, गंगापुर रोड — 2.1 km'},
+        {k:'Reinspection', v:'3 दिन बाद फिर से पत्तों की जांच करें'}
+      ]
+    },
+    {
+      disease:'तना छेदक कीट (Stem Borer)', crop:'सोयाबीन / कपास', conf:'med', confPct:'64%',
+      alt:'संभावित अन्य कारण: तंबाकू इल्ली या रस चूसने वाले कीट।',
+      plan:[
+        {k:'Action', v:'प्रभावित तने काटें, जैविक नियंत्रण के लिए ट्राइकोकार्ड का उपयोग करें'},
+        {k:'Timing', v:'सुबह जल्दी, कीट की गतिविधि के समय'},
+        {k:'Cost', v:'₹300 प्रति एकड़'},
+        {k:'Required', v:'कारटेप हाइड्रोक्लोराइड 4G दानेदार'},
+        {k:'Alternative', v:'हाथ से कीट को चुनना और प्रकाश जाल (लाइट ट्रैप) लगाना'},
+        {k:'Source', v:'पिंपलगांव कृषि सेवा केंद्र — 4.8 km'},
+        {k:'Reinspection', v:'5 दिन बाद खेतों की पुनः निगरानी करें'}
+      ]
+    }
+  ],
+  mr: [
+    {
+      disease:'पानांवरील करपा रोग (Late Blight)', crop:'टोमॅटो / बटाटा', conf:'high', confPct:'91%',
+      alt:'इतर संभाव्य कारणे: जिवाणू ठिपके रोग (कमी शक्यता).',
+      plan:[
+        {k:'Action', v:'रासायनिक नियंत्रणासाठी मॅन्कोझेब २ ग्रॅम/लीटर पाण्यात मिसळून फवारणी करावी'},
+        {k:'Timing', v:'आज संध्याकाळी, पाऊस सुरू होण्यापूर्वी'},
+        {k:'Cost', v:'₹१८०–२२० प्रति एकर'},
+        {k:'Required', v:'हँड स्प्रेअर, मॅन्कोझेब ७५% WP'},
+        {k:'Alternative', v:'कडुनिंब तेल ५ मिली/लीटर + साबणाचा द्रावण (सेंद्रिय फवारणी)'},
+        {k:'Source', v:'नाशिक कृषी केंद्र, गंगापूर रोड — २.१ किमी'},
+        {k:'Reinspection', v:'३ दिवसांनंतर पानांची पुन्हा तपासणी करा'}
+      ]
+    },
+    {
+      disease:'खोडकिडा (Stem Borer)', crop:'सोयाबीन / कापूस', conf:'med', confPct:'64%',
+      alt:'इतर संभाव्य कारणे: तंबाखूवरील लष्करी अळी किंवा रस शोषक कीड.',
+      plan:[
+        {k:'Action', v:'बाधित खोड कापून टाका आणि जैविक नियंत्रणासाठी ट्रायकोकार्ड वापरा'},
+        {k:'Timing', v:'सकाळी लवकर, कीटकांच्या हालचालीच्या वेळी'},
+        {k:'Cost', v:'₹३०० प्रति एकर'},
+        {k:'Required', v:'कारटेप हायड्रोक्लोराईड ४जी दाणेदार'},
+        {k:'Alternative', v:'हात पिकातून कीड गोळा करणे आणि प्रकाश सापळे लावणे'},
+        {k:'Source', v:'पिंपळगाव कृषी सेवा केंद्र — ४.८ किमी'},
+        {k:'Reinspection', v:'५ दिवसांनंतर शेताचे पुन्हा निरीक्षण करा'}
+      ]
+    }
+  ],
+  en: [
+    {
+      disease:'Late Blight', crop:'Tomato / Potato', conf:'high', confPct:'91%',
+      alt:'Possible alternate causes: Bacterial Spot (low probability).',
+      plan:[
+        {k:'Action', v:'Spray Mancozeb 2g/liter of water for chemical control'},
+        {k:'Timing', v:'This evening, before the rains start'},
+        {k:'Cost', v:'₹180–220 per acre'},
+        {k:'Required', v:'Hand sprayer, Mancozeb 75% WP'},
+        {k:'Alternative', v:'Neem oil 5ml/liter + soap solution (organic spray)'},
+        {k:'Source', v:'Nashik Krishi Kendra, Gangapur Road — 2.1 km'},
+        {k:'Reinspection', v:'Re-inspect leaves after 3 days'}
+      ]
+    },
+    {
+      disease:'Stem Borer', crop:'Soybean / Cotton', conf:'med', confPct:'64%',
+      alt:'Possible alternate causes: Tobacco Caterpillar or sucking pests.',
+      plan:[
+        {k:'Action', v:'Cut infested stems, use Trichocards for bio-control'},
+        {k:'Timing', v:'Early morning during pest activity hours'},
+        {k:'Cost', v:'₹300 per acre'},
+        {k:'Required', v:'Cartap Hydrochloride 4G granules'},
+        {k:'Alternative', v:'Hand picking and setting up light traps'},
+        {k:'Source', v:'Pimplagaon Agri Service Center — 4.8 km'},
+        {k:'Reinspection', v:'Re-inspect fields after 5 days'}
+      ]
+    }
+  ]
+};
 
 scanDrop.addEventListener('click', ()=>scanFile.click());
 
@@ -817,7 +1880,7 @@ scanFile.addEventListener('change', (e)=>{
   const img = new Image();
   const reader = new FileReader();
   reader.onload = (ev)=>{
-    img.onload = ()=>{
+    img.onload = async ()=>{
       previewWrap.classList.add('show');
       resultCard.classList.remove('show');
       const ctx = previewCanvas.getContext('2d');
@@ -827,50 +1890,134 @@ scanFile.addEventListener('change', (e)=>{
       previewCanvas.height = img.height * scale;
       ctx.drawImage(img, 0, 0, previewCanvas.width, previewCanvas.height);
 
-      // "analysis" — sample pixel data to deterministically pick a plausible result
-      const data = ctx.getImageData(0,0,previewCanvas.width,previewCanvas.height).data;
-      let sum = 0;
-      for(let i=0;i<data.length;i+=997){ sum += data[i] + data[i+1]*2 + data[i+2]; }
-      const pick = DISEASE_DB[sum % DISEASE_DB.length];
-
       scanOverlay.style.display = 'flex';
-      document.getElementById('scanStatus').textContent = 'विश्लेषण हो रहा है...';
-      setTimeout(()=>{
-        scanOverlay.style.display = 'none';
-        document.getElementById('resDisease').textContent = pick.disease;
-        document.getElementById('resCrop').textContent = pick.crop;
-        const badge = document.getElementById('resConf');
-        badge.textContent = pick.confPct + ' विश्वास';
-        badge.className = 'conf-badge ' + pick.conf;
-        document.getElementById('resAlt').textContent = pick.alt;
+      document.getElementById('scanStatus').textContent = STR[lang].scanAnalyzingText;
 
-        const plannerBox = document.getElementById('plannerBox');
-        plannerBox.innerHTML = pick.plan.map(p=>`<div class="plan-row"><div class="k">${p.k}</div><div class="v">${p.v}</div></div>`).join('');
+      // Capture base64 for API delivery
+      const base64Data = ev.target.result.split(',')[1];
+      const mimeType = file.type;
 
-        const uncertainBox = document.getElementById('uncertainBox');
-        const actionsRow = document.getElementById('resultActionsRow');
-        const privacyNote = document.getElementById('privacyNote');
-        if(pick.conf === 'med'){
-          uncertainBox.classList.add('show');
-          actionsRow.style.display = 'none';
-          privacyNote.style.display = 'none';
-        } else {
-          uncertainBox.classList.remove('show');
-          actionsRow.style.display = 'flex';
-          privacyNote.style.display = pick.disease.includes('स्वस्थ') ? 'none' : 'flex';
-        }
-        document.getElementById('followupBox').classList.remove('show');
-        document.getElementById('followupThanks').classList.remove('show');
-        document.querySelectorAll('.followup-chips button').forEach(b=>b.classList.remove('picked'));
+      // Executing API diagnosis
+      let scanResult = null;
+      try {
+        scanResult = await runGeminiDiagnosis(base64Data, mimeType);
+      } catch (err) {
+        console.warn("Gemini diagnosis failed, using local database fallback.", err);
+        // Deterministic mock fallback
+        const pixelData = ctx.getImageData(0,0,previewCanvas.width,previewCanvas.height).data;
+        let sum = 0;
+        for(let i=0;i<pixelData.length;i+=997){ sum += pixelData[i] + pixelData[i+1]*2 + pixelData[i+2]; }
+        const fallbackList = LOCAL_FALLBACK_DB[lang] || LOCAL_FALLBACK_DB['hi'];
+        scanResult = fallbackList[sum % fallbackList.length];
+      }
 
-        resultCard.classList.add('show');
-        window._lastScan = pick;
-      }, 1600);
+      // Display outputs
+      scanOverlay.style.display = 'none';
+      document.getElementById('resDisease').textContent = scanResult.disease;
+      document.getElementById('resCrop').textContent = scanResult.crop;
+      
+      const badge = document.getElementById('resConf');
+      badge.textContent = scanResult.confPct + ' ' + (lang === 'en' ? 'Conf' : (lang === 'mr' ? 'विश्वास' : 'विश्वास'));
+      badge.className = 'conf-badge ' + scanResult.conf;
+      document.getElementById('resAlt').textContent = (lang === 'en' ? 'Possible alternate causes: ' : (lang === 'mr' ? 'इतर संभाव्य कारणे: ' : 'संभावित अन्य कारण: ')) + scanResult.alt;
+
+      const plannerBox = document.getElementById('plannerBox');
+      plannerBox.innerHTML = scanResult.plan.map(p=>{
+        const displayKey = (planKeyMap[lang] && planKeyMap[lang][p.k]) || p.k;
+        return `<div class="plan-row"><div class="k">${displayKey}</div><div class="v">${p.v}</div></div>`;
+      }).join('');
+
+      const uncertainBox = document.getElementById('uncertainBox');
+      const actionsRow = document.getElementById('resultActionsRow');
+      const privacyNote = document.getElementById('privacyNote');
+
+      if(scanResult.conf === 'med' || scanResult.conf === 'low'){
+        uncertainBox.classList.add('show');
+        actionsRow.style.display = 'none';
+        privacyNote.style.display = 'none';
+      } else {
+        uncertainBox.classList.remove('show');
+        actionsRow.style.display = 'flex';
+        privacyNote.style.display = scanResult.disease.toLowerCase().includes('healthy') || scanResult.disease.includes('स्वस्थ') || scanResult.disease.includes('निरोगी') ? 'none' : 'flex';
+      }
+
+      document.getElementById('followupBox').classList.remove('show');
+      document.getElementById('followupThanks').classList.remove('show');
+      document.querySelectorAll('.followup-chips button').forEach(b=>b.classList.remove('picked'));
+
+      resultCard.classList.add('show');
+      window._lastScan = scanResult;
     };
     img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 });
+
+async function runGeminiDiagnosis(base64Image, mimeType) {
+  const config = getApiConfig();
+  if (config.useMock) {
+    throw new Error("Forced mock fallback by user setting");
+  }
+
+  // Direct Call
+  if (config.geminiKey) {
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.geminiKey}`;
+    const targetLang = lang || 'hi';
+    let langInstruction = 'Hindi';
+    if (targetLang === 'en') {
+      langInstruction = 'English';
+    } else if (targetLang === 'mr') {
+      langInstruction = 'Marathi';
+    }
+
+    const promptText = `You are a crop diagnostic assistant located in Maharashtra, India.
+    Analyze this crop image and output JSON object containing:
+    {
+      "disease": "Name of disease/pest in ${langInstruction} (with English name in parentheses, or 'Healthy Crop' in ${langInstruction} if healthy)",
+      "crop": "Crop Name in ${langInstruction}",
+      "conf": "high" or "med" or "low",
+      "confPct": "percentage e.g. 92%",
+      "alt": "Alternate causes in ${langInstruction}",
+      "plan": [
+        {"k": "Action", "v": "action details in ${langInstruction}"},
+        {"k": "Timing", "v": "timing details in ${langInstruction}"},
+        {"k": "Cost", "v": "cost estimation in ${langInstruction}"},
+        {"k": "Required", "v": "required items in ${langInstruction}"},
+        {"k": "Alternative", "v": "bio substitute in ${langInstruction}"},
+        {"k": "Source", "v": "shops near Nashik in ${langInstruction}"},
+        {"k": "Reinspection", "v": "interval in ${langInstruction}"}
+      ]
+    }`;
+
+    const res = await fetch(geminiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: promptText },
+            { inlineData: { mimeType: mimeType || "image/jpeg", data: base64Image } }
+          ]
+        }],
+        generationConfig: { responseMimeType: "application/json" }
+      })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const result = await res.json();
+    const txt = result.candidates[0].content.parts[0].text;
+    return JSON.parse(txt.trim());
+  }
+
+  // Serverless Proxy Call
+  const response = await fetch("/api/gemini", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: base64Image, mimeType, lang: lang })
+  });
+
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+}
 
 document.getElementById('rescanBtn').addEventListener('click', ()=>{
   scanFile.value = '';
@@ -878,16 +2025,31 @@ document.getElementById('rescanBtn').addEventListener('click', ()=>{
   resultCard.classList.remove('show');
 });
 
-document.getElementById('alertNearbyBtn').addEventListener('click', ()=>{
-  const pick = window._lastScan || DISEASE_DB[0];
-  if(pick.disease.includes('स्वस्थ')){ toast('फ़सल स्वस्थ है — रिपोर्ट जोड़ने की ज़रूरत नहीं'); return; }
-  const result = addMapMarker(pick.disease, pick.crop);
+document.getElementById('alertNearbyBtn').addEventListener('click', async ()=>{
+  const fallbackList = LOCAL_FALLBACK_DB[lang] || LOCAL_FALLBACK_DB['hi'];
+  const pick = window._lastScan || fallbackList[0];
+  if(pick.disease.includes('स्वस्थ') || pick.disease.toLowerCase().includes('healthy') || pick.disease.includes('निरोगी')){
+    toast(lang === 'en' ? 'Crop is healthy — no report needed' : (lang === 'mr' ? 'पीक निरोगी आहे — रिपोर्टची गरज नाही' : 'फ़सल स्वस्थ है — रिपोर्ट जोड़ने की ज़रूरत नहीं'));
+    return;
+  }
+  
+  const result = await addMapMarkerAndSync(pick.disease, pick.crop);
   if(result.thresholdCrossed){
-    toast(`📢 ${result.clusterCount} मिलती-जुलती रिपोर्ट मिलीं — क्षेत्र में अलर्ट भेजा गया`);
-    addFeedItem({title: pick.disease + ' — क्षेत्र में अलर्ट भेजा गया', desc:`${result.clusterCount} रिपोर्ट, 48 घंटे में · जोखिम: ${result.tierLabel}`, level: result.tier==='red'?'high':'med'});
+    toast(lang === 'en' ? `📢 ${result.clusterCount} matching reports — Alert broadcasted to the area` : (lang === 'mr' ? `📢 ${result.clusterCount} समान रिपोर्ट — क्षेत्रात अलर्ट पाठवला गेला` : `📢 ${result.clusterCount} मिलती-जुलती रिपोर्ट मिलीं — क्षेत्र में अलर्ट भेजा गया`));
+    addFeedItem({
+      type: 'scan_alert_sent',
+      disease: pick.disease,
+      clusterCount: result.clusterCount,
+      tierLabel: result.tierLabel,
+      level: result.tier==='red'?'high':'med'
+    });
   } else {
-    toast(`✅ रिपोर्ट जोड़ी गई — अभी सिर्फ़ ${result.clusterCount} रिपोर्ट, अलर्ट के लिए और चाहिए`);
-    addFeedItem({title: pick.disease + ' — आपकी रिपोर्ट दर्ज हुई', desc:`निगरानी में · अभी अलर्ट नहीं भेजा गया (सीमा पार नहीं हुई)`, level:'low'});
+    toast(lang === 'en' ? `✅ Report added — currently only ${result.clusterCount} reports, need more for alert` : (lang === 'mr' ? `✅ रिपोर्ट जोडली — सध्या फक्त ${result.clusterCount} रिपोर्ट, अलर्टसाठी अधिक रिपोर्ट लागतील` : `✅ रिपोर्ट जोड़ी गई — अभी सिर्फ़ ${result.clusterCount} रिपोर्ट, अलर्ट के लिए और चाहिए`));
+    addFeedItem({
+      type: 'scan_report_logged',
+      disease: pick.disease,
+      level: 'low'
+    });
   }
   document.getElementById('followupBox').classList.add('show');
 });
@@ -899,11 +2061,16 @@ document.getElementById('retakeBtn').addEventListener('click', ()=>{
   scanFile.click();
 });
 
-document.getElementById('sendExpertBtn').addEventListener('click', ()=>{
-  const pick = window._lastScan || DISEASE_DB[0];
-  addExpertCase(pick, 'pending');
-  toast('🧑‍🌾 केस विशेषज्ञ को भेजा गया — जवाब 24 घंटे में मिलेगा');
-  addFeedItem({title:'केस विशेषज्ञ को भेजा गया', desc:pick.disease + ' · भरोसा कम था · KVK समीक्षा में', level:'med'});
+document.getElementById('sendExpertBtn').addEventListener('click', async ()=>{
+  const fallbackList = LOCAL_FALLBACK_DB[lang] || LOCAL_FALLBACK_DB['hi'];
+  const pick = window._lastScan || fallbackList[0];
+  await addExpertCaseAndSync(pick, 'pending');
+  toast(lang === 'en' ? '🧑‍🌾 Case sent to expert — response in 24 hours' : (lang === 'mr' ? '🧑‍🌾 केस तज्ज्ञांकडे पाठवली — २४ तासांत उत्तर मिळेल' : '🧑‍🌾 केस विशेषज्ञ को भेजा गया — जवाब 24 घंटे में मिलेगा'));
+  addFeedItem({
+    type: 'expert_escalated',
+    disease: pick.disease,
+    level: 'med'
+  });
 });
 
 document.querySelectorAll('.followup-chips button').forEach(btn=>{
@@ -913,21 +2080,22 @@ document.querySelectorAll('.followup-chips button').forEach(btn=>{
     document.getElementById('followupThanks').classList.add('show');
     const v = btn.dataset.v;
     if(v === 'worse'){
-      toast('⚠️ बिगड़ने की सूचना मिली — केस विशेषज्ञ को भेजा जा रहा है');
-      addExpertCase(window._lastScan || DISEASE_DB[0], 'pending');
+      toast(lang === 'en' ? '⚠️ Worsening reported — sending case to expert' : (lang === 'mr' ? '⚠️ प्रकृती ढासळल्याचे समजले — केस तज्ज्ञांकडे वर्ग केली जात आहे' : '⚠️ बिगड़ने की सूचना मिली — केस विशेषज्ञ को भेजा जा रहा है'));
+      const fallbackList = LOCAL_FALLBACK_DB[lang] || LOCAL_FALLBACK_DB['hi'];
+      const pick = window._lastScan || fallbackList[0];
+      addExpertCaseAndSync(pick, 'pending');
     } else {
-      toast('धन्यवाद, दर्ज कर लिया गया');
+      toast(lang === 'en' ? 'Thank you, recorded' : (lang === 'mr' ? 'धन्यवाद, नोंद केली गेली' : 'धन्यवाद, दर्ज कर लिया गया'));
     }
   });
 });
 
 /* ================= Map ================= */
-// Risk tiers follow the spec: green (low) → yellow (monitor) → orange (multiple similar reports) → red (rapid/expert-verified)
 const TIER = {
-  green:  {color:'#3F7D58', radius:300,  label:'हरा — कम जोखिम'},
-  yellow: {color:'#E8A33D', radius:500,  label:'पीला — निगरानी करें'},
-  orange: {color:'#D97A2B', radius:750,  label:'नारंगी — कई समान रिपोर्ट'},
-  red:    {color:'#C1440E', radius:1000, label:'लाल — तेज़ी से बढ़ रहा / सत्यापित'},
+  green:  {color:'#3F7D58', radius:300,  label:'Green · Low Risk'},
+  yellow: {color:'#E8A33D', radius:500,  label:'Yellow · Monitor'},
+  orange: {color:'#D97A2B', radius:750,  label:'Orange · Alert'},
+  red:    {color:'#C1440E', radius:1000, label:'Red · Verified threat'},
 };
 function tierForCount(n, verified){
   if(verified) return 'red';
@@ -936,24 +2104,131 @@ function tierForCount(n, verified){
   if(n >= 2) return 'yellow';
   return 'green';
 }
+
+// Nashik, MH coordinates base
 let seedAlerts = [
-  {lat:28.6692, lng:77.4538, tier:'red', label:'पत्ता झुलसा रोग', reports:6, why:'48 घंटे में 6 मिलती-जुलती रिपोर्ट + विशेषज्ञ पुष्टि'},
-  {lat:28.6560, lng:77.4390, tier:'orange', label:'पत्ता झुलसा रोग', reports:4, why:'24 घंटे में 4 मिलती-जुलती रिपोर्ट'},
-  {lat:28.6810, lng:77.4700, tier:'yellow', label:'तना छेदक कीट (संभावित)', reports:2, why:'2 रिपोर्ट मिलीं — निगरानी जारी'},
-  {lat:28.6450, lng:77.4600, tier:'yellow', label:'चूर्णिल आसिता', reports:2, why:'2 रिपोर्ट मिलीं — निगरानी जारी'},
-  {lat:28.6900, lng:77.4300, tier:'green', label:'स्वस्थ फ़सल रिपोर्ट', reports:1, why:'कोई असामान्य लक्षण नहीं'},
-  {lat:28.6600, lng:77.4850, tier:'green', label:'नियमित जाँच', reports:1, why:'नियमित निगरानी रिपोर्ट'},
+  {lat:19.9975, lng:73.7898, tier:'red', label:'पत्ता झुलसा रोग', reports:6, why:'48 घंटे में 6 रिपोर्ट + KVK पुष्टि'},
+  {lat:20.1700, lng:73.9800, tier:'orange', label:'पत्ता झुलसा रोग', reports:4, why:'24 घंटे में 4 मिलती-जुलती रिपोर्ट'},
+  {lat:20.2000, lng:73.8300, tier:'yellow', label:'तना छेदक कीट (संभावित)', reports:2, why:'2 रिपोर्ट मिलीं — निगरानी जारी'},
+  {lat:20.1472, lng:74.2255, tier:'yellow', label:'चूर्णिल आसिता', reports:2, why:'2 रिपोर्ट मिलीं — निगरानी जारी'},
+  {lat:19.9300, lng:73.5300, tier:'green', label:'स्वस्थ फ़सल रिपोर्ट', reports:1, why:'कोई असामान्य लक्षण नहीं'},
 ];
 
+async function addMapMarkerAndSync(label, crop) {
+  const config = getApiConfig();
+  // Add logic to save report to local DB and server
+  const jitter = 0.012;
+  const lat = 19.9975 + (Math.random() - 0.5) * jitter;
+  const lng = 73.7898 + (Math.random() - 0.5) * jitter;
+
+  const newReport = {
+    disease: label,
+    crop: crop,
+    lat: lat,
+    lng: lng,
+    conf: 'high',
+    confPct: '90%'
+  };
+
+  if (!config.useMock) {
+    try {
+      await fetch('/api/database?type=reports', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newReport)
+      });
+    } catch(e) {}
+  }
+
+  // Local update
+  const near = seedAlerts.find(a => a.label === label && Math.hypot(a.lat-19.9975, a.lng-73.7898) < 0.04);
+  let cluster;
+  if(near){
+    near.reports += 1;
+    cluster = near;
+  } else {
+    cluster = {lat, lng, label, reports:1, tier:'green', why:''};
+    seedAlerts.unshift(cluster);
+  }
+  const verified = false;
+  const newTier = tierForCount(cluster.reports, verified);
+  const thresholdCrossed = (newTier === 'orange' || newTier === 'red') && cluster.tier !== newTier;
+  cluster.tier = newTier;
+  cluster.why = lang === 'en' ? `${cluster.reports} matching reports, in the last 48 hours` : (lang === 'mr' ? `गेल्या ४८ तासांत ${cluster.reports} समान रिपोर्ट` : `${cluster.reports} मिलती-जुलती रिपोर्ट, हाल के 48 घंटे में`);
+
+  document.getElementById('statReports').textContent = (parseInt(document.getElementById('statReports').textContent)+1);
+  if(window._map){
+    rebindMapPopups();
+  }
+  return {thresholdCrossed, clusterCount:cluster.reports, tier:newTier, tierLabel:TIER[newTier].label};
+}
+
+function rebindMapPopups() {
+  if (!window._mapLayers) return;
+  window._mapLayers.forEach(l => window._map.removeLayer(l));
+  window._mapLayers = [];
+  seedAlerts.forEach(a => {
+    // Translate the standard labels for seed alerts
+    let label = a.label;
+    let why = a.why;
+    if (a.label.includes('झुलसा') || a.label.toLowerCase().includes('blight')) {
+      label = lang === 'en' ? 'Late Blight' : (lang === 'mr' ? 'पानांवरील करपा रोग' : 'पत्ता झुलसा रोग');
+    } else if (a.label.includes('छेदक') || a.label.toLowerCase().includes('borer')) {
+      label = lang === 'en' ? 'Stem Borer (Probable)' : (lang === 'mr' ? 'खोडकिडा (संभाव्य)' : 'तना छेदक कीट (संभावित)');
+    } else if (a.label.includes('आसिता') || a.label.toLowerCase().includes('mildew')) {
+      label = lang === 'en' ? 'Powdery Mildew' : (lang === 'mr' ? 'भुरी रोग' : 'चूर्णिल आसिता');
+    } else if (a.label.includes('स्वस्थ') || a.label.toLowerCase().includes('healthy') || a.label.toLowerCase().includes('report')) {
+      label = lang === 'en' ? 'Healthy Crop Report' : (lang === 'mr' ? 'निरोगी पिकाचा अहवाल' : 'स्वस्थ फ़सल रिपोर्ट');
+    }
+
+    if (a.reports === 6) {
+      why = lang === 'en' ? '6 reports in 48h + KVK confirmation' : (lang === 'mr' ? '४८ तासांत ६ रिपोर्ट + KVK पडताळणी' : '48 घंटे में 6 रिपोर्ट + KVK पुष्टि');
+    } else if (a.reports === 4) {
+      why = lang === 'en' ? '4 matching reports in 24h' : (lang === 'mr' ? '२४ तासांत ४ समान रिपोर्ट' : '24 घंटे में 4 मिलती-जुलती रिपोर्ट');
+    } else if (a.reports === 2) {
+      why = lang === 'en' ? '2 reports received — monitoring active' : (lang === 'mr' ? '२ रिपोर्ट मिळाल्या — निरीक्षण सुरू' : '2 रिपोर्ट मिलीं — निगरानी जारी');
+    } else if (a.reports === 1) {
+      why = lang === 'en' ? 'No abnormal symptoms' : (lang === 'mr' ? 'कोणतीही असामान्य लक्षणे नाहीत' : 'कोई असामान्य लक्षण नहीं');
+    } else {
+      why = lang === 'en' ? `${a.reports} matching reports received` : (lang === 'mr' ? `${a.reports} समान रिपोर्ट मिळाल्या` : `${a.reports} मिलती-जुलती रिपोर्ट मिलीं`);
+    }
+
+    const t = TIER[a.tier];
+    const circle = L.circle([a.lat, a.lng], {
+      radius: t.radius,
+      color: t.color,
+      fillColor: t.color,
+      fillOpacity: 0.28,
+      weight: 2,
+      opacity: 0.85,
+    }).addTo(window._map);
+    circle._baseRadius = t.radius;
+    
+    const popupText = `
+      <b>${label}</b><br>
+      ${a.reports} ${lang === 'en' ? 'Reports (Grid level, privacy preserved)' : (lang === 'mr' ? 'रिपोर्ट (ग्रिड पातळीवर, स्थान सुरक्षित)' : 'रिपोर्ट (ग्रिड स्तर पर, स्थान सुरक्षित)')}<br>
+      <b>${lang === 'en' ? 'Risk TIER: ' : (lang === 'mr' ? 'जोखीम पातळी: ' : 'जोखिम श्रेणी: ')}${STR[lang]['mapLegend' + a.tier.charAt(0).toUpperCase() + a.tier.slice(1)].split(' · ')[1] || STR[lang]['mapLegend' + a.tier.charAt(0).toUpperCase() + a.tier.slice(1)]}</b><br>
+      <span style="font-size:11.5px;">${why}</span>
+    `;
+    circle.bindPopup(popupText);
+    window._mapLayers.push(circle);
+  });
+}
+
 function initMap(){
-  const map = L.map('map', {zoomControl:false, attributionControl:false}).setView([28.6692, 77.4538], 12);
+  // Center on Nashik
+  const map = L.map('map', {zoomControl:false, attributionControl:false}).setView([19.9975, 73.7898], 11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:17}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   window._map = map;
   window._mapLayers = [];
-  seedAlerts.forEach(a=>renderRiskCircle(map, a));
+  
+  // Seed reports from remote DB if available
+  fetchDatabaseAlerts().then(() => {
+    rebindMapPopups();
+  });
 
-  // gentle pulse animation loop for the "circle to search" style glow
+  // Pulse animation loop
   let grow = 0;
   setInterval(()=>{
     grow = (grow + 1) % 60;
@@ -971,6 +2246,33 @@ function initMap(){
   }, ()=>{}, {timeout:4000});
 }
 
+async function fetchDatabaseAlerts() {
+  const config = getApiConfig();
+  if (config.useMock) return;
+  try {
+    const res = await fetch('/api/database?type=reports');
+    if (res.ok) {
+      const reports = await res.json();
+      reports.forEach(r => {
+        if (r.lat && r.lng) {
+          // add to seedAlerts
+          const exists = seedAlerts.some(a => Math.abs(a.lat - r.lat) < 0.001 && Math.abs(a.lng - r.lng) < 0.001);
+          if (!exists) {
+            seedAlerts.push({
+              lat: r.lat,
+              lng: r.lng,
+              tier: r.conf === 'high' ? 'orange' : 'yellow',
+              label: r.disease,
+              reports: 1,
+              why: 'सेंसर/किसान द्वारा हाल में रिपोर्ट की गई'
+            });
+          }
+        }
+      });
+    }
+  } catch(e) {}
+}
+
 function renderRiskCircle(map, a){
   const t = TIER[a.tier];
   const circle = L.circle([a.lat, a.lng], {
@@ -982,86 +2284,102 @@ function renderRiskCircle(map, a){
     opacity: 0.85,
   }).addTo(map);
   circle._baseRadius = t.radius;
-  circle.bindPopup(`<b>${a.label}</b><br>${a.reports} रिपोर्ट (ग्रिड स्तर पर, सटीक खेत छुपाया गया)<br><b>${t.label}</b><br><span style="font-size:11.5px;">${a.why}</span>`);
+  circle.bindPopup(`<b>${a.label}</b><br>${a.reports} रिपोर्ट (ग्रिड स्तर पर, स्थान सुरक्षित)<br><b>${t.label}</b><br><span style="font-size:11.5px;">${a.why}</span>`);
   window._mapLayers.push(circle);
 }
 
-// Clusters reports within ~1.5km "grid cell" to simulate the threshold-based alert logic from the spec.
-function addMapMarker(label, crop){
-  const jitter = 0.012; // keeps exact farm location private — snaps to a village/grid-level point
-  const near = seedAlerts.find(a => a.label === label && Math.hypot(a.lat-28.6692, a.lng-77.4538) < 0.03);
-  let cluster;
-  if(near){
-    near.reports += 1;
-    cluster = near;
-  } else {
-    cluster = {lat:28.6692+(Math.random()-0.5)*jitter*2, lng:77.4538+(Math.random()-0.5)*jitter*2, label, reports:1, tier:'green', why:''};
-    seedAlerts.unshift(cluster);
-  }
-  const verified = false; // becomes true only after expert confirmation (see Expert Dashboard)
-  const newTier = tierForCount(cluster.reports, verified);
-  const thresholdCrossed = (newTier === 'orange' || newTier === 'red') && cluster.tier !== newTier;
-  cluster.tier = newTier;
-  cluster.why = `${cluster.reports} मिलती-जुलती रिपोर्ट, हाल के 48 घंटे में`;
-
-  document.getElementById('statReports').textContent = (parseInt(document.getElementById('statReports').textContent)+1);
-  if(window._map){
-    // redraw this cluster's circle fresh so color/radius reflect the new tier
-    window._mapLayers = window._mapLayers.filter(l=>{
-      const isThis = Math.abs(l.getLatLng().lat-cluster.lat)<0.0001 && Math.abs(l.getLatLng().lng-cluster.lng)<0.0001;
-      if(isThis) window._map.removeLayer(l);
-      return !isThis;
-    });
-    renderRiskCircle(window._map, cluster);
-  }
-  return {thresholdCrossed, clusterCount:cluster.reports, tier:newTier, tierLabel:TIER[newTier].label};
-}
-
 if(document.getElementById('map')){
-  // Leaflet needs to run after script tag executes; DOM already present
   window.addEventListener('load', initMap);
 }
 
-/* ================= Prices ================= */
-const CROPS = ['गेहूं','धान','सरसों','आलू','गन्ना'];
+/* ================= Maharashtra Mandi Prices Net Profit calculations ================= */
+const CROP_TRANSLATIONS = {
+  hi: {
+    'tomato': 'टमाटर',
+    'onion': 'प्याज़ (कांदा)',
+    'soybean': 'सोयाबीन',
+    'grapes': 'अंगूर (द्राक्षे)',
+    'cotton': 'कपास (कापूस)'
+  },
+  mr: {
+    'tomato': 'टोमॅटो',
+    'onion': 'कांदा',
+    'soybean': 'सोयाबीन',
+    'grapes': 'द्राक्षे',
+    'cotton': 'कापूस'
+  },
+  en: {
+    'tomato': 'Tomato',
+    'onion': 'Onion',
+    'soybean': 'Soybean',
+    'grapes': 'Grapes',
+    'cotton': 'Cotton'
+  }
+};
+
+const MANDI_TRANSLATIONS = {
+  hi: {
+    'Pimplagaon Mandi': 'पिंपलगांव मंडी',
+    'Nashik Mandi': 'नासिक मंडी',
+    'Lasalgaon Mandi': 'लासलगांव मंडी',
+    'Pune Mandi': 'पुणे मंडी'
+  },
+  mr: {
+    'Pimplagaon Mandi': 'पिंपळगाव बाजार समिती',
+    'Nashik Mandi': 'नाशिक बाजार समिती',
+    'Lasalgaon Mandi': 'लासलगाव बाजार समिती',
+    'Pune Mandi': 'पुणे बाजार समिती'
+  },
+  en: {
+    'Pimplagaon Mandi': 'Pimplagaon Mandi',
+    'Nashik Mandi': 'Nashik Mandi',
+    'Lasalgaon Mandi': 'Lasalgaon Mandi',
+    'Pune Mandi': 'Pune Mandi'
+  }
+};
+
+const CROPS = ['tomato', 'onion', 'soybean', 'grapes', 'cotton'];
 const MANDI_BASE = {
-  'गेहूं': [
-    {name:'मोदीनगर मंडी', dist:6, price:2210},
-    {name:'गाज़ियाबाद मंडी', dist:11, price:2260},
-    {name:'हापुड़ मंडी', dist:18, price:2150},
-    {name:'मेरठ मंडी', dist:27, price:2295},
+  'tomato': [
+    {name:'Pimplagaon Mandi', dist:21, price:1810},
+    {name:'Nashik Mandi', dist:8, price:1740},
+    {name:'Lasalgaon Mandi', dist:48, price:1920},
+    {name:'Pune Mandi', dist:142, price:2210},
   ],
-  'धान': [
-    {name:'मोदीनगर मंडी', dist:6, price:2010},
-    {name:'गाज़ियाबाद मंडी', dist:11, price:1985},
-    {name:'हापुड़ मंडी', dist:18, price:2060},
-    {name:'मेरठ मंडी', dist:27, price:2040},
+  'onion': [
+    {name:'Lasalgaon Mandi', dist:48, price:2610},
+    {name:'Pimplagaon Mandi', dist:21, price:2520},
+    {name:'Nashik Mandi', dist:8, price:2480},
+    {name:'Pune Mandi', dist:142, price:2750},
   ],
-  'सरसों': [
-    {name:'मोदीनगर मंडी', dist:6, price:5340},
-    {name:'गाज़ियाबाद मंडी', dist:11, price:5410},
-    {name:'हापुड़ मंडी', dist:18, price:5280},
-    {name:'मेरठ मंडी', dist:27, price:5460},
+  'soybean': [
+    {name:'Nashik Mandi', dist:8, price:4420},
+    {name:'Pimplagaon Mandi', dist:21, price:4480},
+    {name:'Lasalgaon Mandi', dist:48, price:4390},
+    {name:'Pune Mandi', dist:142, price:4590},
   ],
-  'आलू': [
-    {name:'मोदीनगर मंडी', dist:6, price:980},
-    {name:'गाज़ियाबाद मंडी', dist:11, price:1040},
-    {name:'हापुड़ मंडी', dist:18, price:920},
-    {name:'मेरठ मंडी', dist:27, price:1010},
+  'grapes': [
+    {name:'Nashik Mandi', dist:8, price:8200},
+    {name:'Pimplagaon Mandi', dist:21, price:8500},
+    {name:'Lasalgaon Mandi', dist:48, price:8100},
+    {name:'Pune Mandi', dist:142, price:9100},
   ],
-  'गन्ना': [
-    {name:'मोदीनगर मंडी', dist:6, price:365},
-    {name:'गाज़ियाबाद मंडी', dist:11, price:370},
-    {name:'हापुड़ मंडी', dist:18, price:358},
-    {name:'मेरठ मंडी', dist:27, price:372},
+  'cotton': [
+    {name:'Pune Mandi', dist:142, price:6900},
+    {name:'Lasalgaon Mandi', dist:48, price:6680},
+    {name:'Pimplagaon Mandi', dist:21, price:6600},
+    {name:'Nashik Mandi', dist:8, price:6550},
   ],
 };
 const cropSelect = document.getElementById('cropSelect');
 const priceList = document.getElementById('priceList');
-let activeCrop = 'गेहूं';
+let activeCrop = 'tomato';
 
 function renderCropChips(){
-  cropSelect.innerHTML = CROPS.map(c=>`<button class="crop-chip ${c===activeCrop?'active':''}" data-c="${c}">${c}</button>`).join('');
+  cropSelect.innerHTML = CROPS.map(c=>{
+    const label = CROP_TRANSLATIONS[lang][c] || c;
+    return `<button class="crop-chip ${c===activeCrop?'active':''}" data-c="${c}">${label}</button>`;
+  }).join('');
   cropSelect.querySelectorAll('.crop-chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{ activeCrop = btn.dataset.c; renderCropChips(); renderPrices(); });
   });
@@ -1069,23 +2387,30 @@ function renderCropChips(){
 function renderPrices(){
   const rows = MANDI_BASE[activeCrop].map(m=>({...m, net: Math.round(m.price - m.dist*3.5)}));
   rows.sort((a,b)=>b.net-a.net);
-  priceList.innerHTML = rows.map((m,i)=>`
-    <div class="price-card ${i===0?'best':''}">
-      <div>
-        ${i===0?'<div class="best-tag">✓ सबसे फ़ायदेमंद</div>':''}
-        <div class="mname">${m.name}</div>
-        <div class="mdist">${m.dist} km दूर · भाड़ा ~₹${Math.round(m.dist*3.5)}/क्विंटल</div>
-      </div>
-      <div class="mprice">
-        <b>₹${m.net}</b>
-        <span>असली भाव · मंडी दर ₹${m.price}</span>
-      </div>
-    </div>`).join('');
+  priceList.innerHTML = rows.map((m,i)=>{
+    const bestTag = i === 0 ? `<div class="best-tag">${STR[lang].pricesBestReturn}</div>` : '';
+    const nameTrans = MANDI_TRANSLATIONS[lang][m.name] || m.name;
+    const distText = lang === 'en' ? `${m.dist} km away · Freight ~₹${Math.round(m.dist*3.5)}/quintal` : (lang === 'mr' ? `${m.dist} किमी दूर · वाहतूक खर्च ~₹${Math.round(m.dist*3.5)}/क्विंटल` : `${m.dist} km दूर · भाड़ा ~₹${Math.round(m.dist*3.5)}/क्विंटल`);
+    const netLabel = STR[lang].pricesNetPrice;
+    const mandiRateLabel = STR[lang].pricesMandiRate;
+    return `
+      <div class="price-card ${i===0?'best':''}">
+        <div>
+          ${bestTag}
+          <div class="mname">${nameTrans}</div>
+          <div class="mdist">${distText}</div>
+        </div>
+        <div class="mprice">
+          <b>₹${m.net}</b>
+          <span>${netLabel} · ${mandiRateLabel}${m.price}</span>
+        </div>
+      </div>`;
+  }).join('');
 }
 renderCropChips();
 renderPrices();
 
-/* ================= WhatsApp preview mic + waveform ================= */
+/* ================= WhatsApp Simulator with real audio recording ================= */
 function buildWave(el, n=26){
   el.innerHTML = '';
   for(let i=0;i<n;i++){
@@ -1097,97 +2422,353 @@ function buildWave(el, n=26){
 }
 buildWave(document.getElementById('wave1'));
 
+function playMockVoice(id) {
+  const mockText = lang === 'en' ? "Apply urea to treat nitrogen deficiency" : (lang === 'mr' ? "नायट्रोजनची कमतरता दूर करण्यासाठी युरिया फवारा" : "नाइट्रोजन की कमी को दूर करने के लिए यूरिया का छिड़काव करें");
+  toast(lang === 'en' ? "🔊 Playing voice reply..." : (lang === 'mr' ? "🔊 व्हॉइस रिप्लाय प्ले करत आहे..." : "🔊 प्लेइंग वॉइस रिप्लाई..."));
+  synthesizeAndPlayTTS(mockText);
+}
+
 const waMicBtn = document.getElementById('waMicBtn');
 const waInputText = document.getElementById('waInputText');
 const waThread = document.getElementById('waThread');
-waMicBtn.addEventListener('click', ()=>{
-  waInputText.textContent = '🎙️ रिकॉर्ड हो रहा है...';
-  waMicBtn.style.background = 'var(--red)';
-  setTimeout(()=>{
-    waMicBtn.style.background = 'var(--leaf)';
-    waInputText.textContent = '🎙️ वॉइस नोट भेजने के लिए दबाकर रखें';
-    const bubbleOut = document.createElement('div');
-    bubbleOut.className = 'wa-bubble wa-out';
-    const wid = 'w'+Date.now();
-    bubbleOut.innerHTML = `<div class="voice-note"><div class="play">▶</div><div class="wave" id="${wid}"></div><span style="font-size:11px;">0:0${2+Math.floor(Math.random()*5)}</span></div>`;
-    waThread.appendChild(bubbleOut);
-    buildWave(document.getElementById(wid));
-    waThread.scrollTop = waThread.scrollHeight;
+let waRecorder;
+let waChunks = [];
+let waRecording = false;
 
-    setTimeout(()=>{
-      const bubbleIn = document.createElement('div');
-      bubbleIn.className = 'wa-bubble wa-in';
-      bubbleIn.innerHTML = '🎧 सुना: <i>"कीड़े लग गए हैं, दवा बताओ"</i><br><br>यह तना छेदक कीट जैसा लगता है। कार्टेप हाइड्रोक्लोराइड 4G, 10kg/एकड़ छिड़कें। आपके इलाके में 5 और किसानों ने यही रिपोर्ट की है — नक्शे पर अपडेट हो गया।';
-      waThread.appendChild(bubbleIn);
+waMicBtn.addEventListener('click', async () => {
+  if (waRecording) {
+    // Stop recording
+    if (waRecorder && waRecorder.state !== 'inactive') {
+      waRecorder.stop();
+    }
+    waRecording = false;
+    waMicBtn.style.background = 'var(--leaf)';
+    waInputText.textContent = STR[lang].waInputPlaceholder;
+  } else {
+    // Start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      waRecorder = new MediaRecorder(stream);
+      waChunks = [];
+      waRecorder.ondataavailable = (e) => {
+        waChunks.push(e.data);
+      };
+      waRecorder.onstop = async () => {
+        const audioBlob = new Blob(waChunks, { type: 'audio/wav' });
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Audio = reader.result.split(',')[1];
+          
+          // Append outgoing bubble
+          const bubbleOut = document.createElement('div');
+          bubbleOut.className = 'wa-bubble wa-out';
+          const wid = 'w'+Date.now();
+          bubbleOut.innerHTML = `<div class="voice-note"><div class="play" id="play_${wid}">▶</div><div class="wave" id="${wid}"></div><span style="font-size:11px;">0:04</span></div>`;
+          waThread.appendChild(bubbleOut);
+          buildWave(document.getElementById(wid));
+          waThread.scrollTop = waThread.scrollHeight;
+
+          toast(lang === 'en' ? "🎙️ WhatsApp voice note delivered, transcribing..." : (lang === 'mr' ? "🎙️ व्हॉट्सॲप व्हॉइस नोट पाठवली, भाषांतर होत आहे..." : "🎙️ WhatsApp वॉइस नोट भेजी गई, अनुवाद हो रहा है..."));
+          const text = await transcribeAudio(base64Audio);
+          
+          // Process reply
+          setTimeout(async () => {
+            const bubbleIn = document.createElement('div');
+            bubbleIn.className = 'wa-bubble wa-in';
+            const reply = craftQueryReply(text);
+            const heardLabel = lang === 'en' ? 'Heard: ' : (lang === 'mr' ? 'एकले: ' : 'सुना: ');
+            bubbleIn.innerHTML = `🎧 ${heardLabel} <i>"${text}"</i><br><br>${reply}`;
+            waThread.appendChild(bubbleIn);
+            waThread.scrollTop = waThread.scrollHeight;
+            
+            const mapToast = lang === 'en' ? '🗺️ Map updated and response rendered' : (lang === 'mr' ? '🗺️ नकाशा अद्ययावत केला आणि प्रतिसाद दिला' : '🗺️ नक्शा अपडेट हुआ और जवाब दिया गया');
+            toast(mapToast);
+            await synthesizeAndPlayTTS(reply);
+          }, 1400);
+        };
+        reader.readAsDataURL(audioBlob);
+      };
+      
+      waRecorder.start();
+      waRecording = true;
+      waMicBtn.style.background = 'var(--red)';
+      waInputText.textContent = lang === 'en' ? '🎙️ Recording... (Click to stop)' : (lang === 'mr' ? '🎙️ रेकॉर्डिंग सुरू (थांबवण्यासाठी क्लिक करा)...' : '🎙️ रिकॉर्डिंग चालू (क्लिक कर रोकें)...');
+    } catch (e) {
+      // Fallback
+      toast(lang === 'en' ? "WhatsApp Demo mic fallback" : (lang === 'mr' ? "व्हॉट्सॲप डेमो माईक पर्याय" : "व्हाट्सएप डेमो माइक फ़ॉलबैक"));
+      const bubbleOut = document.createElement('div');
+      bubbleOut.className = 'wa-bubble wa-out';
+      const wid = 'w'+Date.now();
+      bubbleOut.innerHTML = `<div class="voice-note"><div class="play" onclick="playMockVoice('${wid}')">▶</div><div class="wave" id="${wid}"></div><span style="font-size:11px;">0:05</span></div>`;
+      waThread.appendChild(bubbleOut);
+      buildWave(document.getElementById(wid));
       waThread.scrollTop = waThread.scrollHeight;
-      toast('🗺️ नक्शा अपडेट हुआ');
-    }, 1300);
-  }, 1600);
+
+      setTimeout(() => {
+        const bubbleIn = document.createElement('div');
+        bubbleIn.className = 'wa-bubble wa-in';
+        const text = lang === 'en' ? "Pests detected, tell me medicine" : (lang === 'mr' ? "कीटक आढळले आहेत, औषध सांगा" : "कीड़े लग गए हैं, दवा बताओ");
+        const reply = lang === 'en' 
+          ? "This looks like Stem Borer. Spray Cartap Hydrochloride 4G. 5 other farmers in your Nashik area have reported this — Map updated."
+          : (lang === 'mr'
+            ? "हे खोडकिडासारखे दिसते. कारटेप हायड्रोक्लोराईड ४ जी फवारणी करा. तुमच्या नाशिक परिसरातील इतर ५ शेतकऱ्यांनी अशीच नोंद केली आहे — नकाशा अपडेट केला."
+            : "यह तना छेदक कीट जैसा लगता है। कारटेप हाइड्रोक्लोराइड 4G का छिड़काव करें। आपके क्षेत्र नासिक में 5 और किसानों ने यही रिपोर्ट की है — नक्शा अपडेट हुआ।");
+        const heardLabel = lang === 'en' ? 'Heard: ' : (lang === 'mr' ? 'एकले: ' : 'सुना: ');
+        bubbleIn.innerHTML = `🎧 ${heardLabel} <i>"${text}"</i><br><br>${reply}`;
+        waThread.appendChild(bubbleIn);
+        waThread.scrollTop = waThread.scrollHeight;
+        const mapToast = lang === 'en' ? '🗺️ Map updated' : (lang === 'mr' ? '🗺️ नकाशा अपडेट केला' : '🗺️ नक्शा अपडेट हुआ');
+        toast(mapToast);
+        synthesizeAndPlayTTS(reply);
+      }, 1500);
+    }
+  }
 });
 
 /* ================= Expert Verification Dashboard ================= */
+const EXPERT_TRANSLATIONS = {
+  hi: {
+    disease: {
+      'late_blight': 'पत्ता झुलसा रोग (Late Blight)',
+      'stem_borer': 'तना छेदक कीट (संभावित)',
+      'powdery_mildew': 'चूर्णिल आसिता',
+      'healthy': 'स्वस्थ फ़सल'
+    },
+    crop: {
+      'tomato': 'टमाटर',
+      'onion': 'कांदा',
+      'soybean': 'सोयाबीन',
+      'grapes': 'अंगूर (द्राक्षे)',
+      'cotton': 'कपास',
+      'rice': 'धान',
+      'mustard': 'सरसों'
+    },
+    note: {
+      'late_blight_note': '6 किसानों से मिलती-जुलती रिपोर्ट, 48 घंटे में — रेड-टियर अलर्ट का प्रस्ताव',
+      'stem_borer_note': 'AI भरोसा कम — किसान ने खुद विशेषज्ञ के पास भेजा',
+      'powdery_mildew_note': '3 रिपोर्ट, बढ़ती प्रवृत्ति — निगरानी सुझाई गई'
+    },
+    pending: 'लंबित',
+    verified: 'सत्यापित',
+    rejected: 'अस्वीकृत'
+  },
+  mr: {
+    disease: {
+      'late_blight': 'पानांवरील करपा रोग (Late Blight)',
+      'stem_borer': 'खोडकिडा (संभाव्य)',
+      'powdery_mildew': 'भुरी रोग',
+      'healthy': 'निरोगी पीक'
+    },
+    crop: {
+      'tomato': 'टोमॅटो',
+      'onion': 'कांदा',
+      'soybean': 'सोयाबीन',
+      'grapes': 'द्राक्षे',
+      'cotton': 'कापूस',
+      'rice': 'भात',
+      'mustard': 'मोहरी'
+    },
+    note: {
+      'late_blight_note': '४८ तासांत ६ शेतकऱ्यांचे समान रिपोर्ट — रेड-टियर अलर्टचा प्रस्ताव',
+      'stem_borer_note': 'AI खात्री कमी — शेतकऱ्याने स्वतः तज्ज्ञांकडे पाठवले',
+      'powdery_mildew_note': '३ रिपोर्ट, वाढती प्रवृत्ती — देखरेखीची शिफारस'
+    },
+    pending: 'लंबित',
+    verified: 'सत्यापित',
+    rejected: 'अस्वीकृत'
+  },
+  en: {
+    disease: {
+      'late_blight': 'Late Blight',
+      'stem_borer': 'Stem Borer (Probable)',
+      'powdery_mildew': 'Powdery Mildew',
+      'healthy': 'Healthy Crop'
+    },
+    crop: {
+      'tomato': 'Tomato',
+      'onion': 'Onion',
+      'soybean': 'Soybean',
+      'grapes': 'Grapes',
+      'cotton': 'Cotton',
+      'rice': 'Rice',
+      'mustard': 'Mustard'
+    },
+    note: {
+      'late_blight_note': '6 similar reports in 48 hours — proposed Red-tier alert',
+      'stem_borer_note': 'Low AI confidence — referred to expert by farmer',
+      'powdery_mildew_note': '3 reports, increasing trend — monitoring suggested'
+    },
+    pending: 'Pending',
+    verified: 'Verified',
+    rejected: 'Rejected'
+  }
+};
+
 let expertCases = [
-  {id:1, disease:'पत्ता झुलसा रोग (Late Blight)', crop:'टमाटर', village:'रामपुर, ग्रिड B4', reports:6, confPct:'91%', status:'pending', note:'6 किसानों से मिलती-जुलती रिपोर्ट, 48 घंटे में — रेड-टियर अलर्ट का प्रस्ताव'},
-  {id:2, disease:'तना छेदक कीट (संभावित)', crop:'धान', village:'सोहनपुर, ग्रिड C2', reports:2, confPct:'64%', status:'pending', note:'AI भरोसा कम — किसान ने खुद विशेषज्ञ के पास भेजा'},
-  {id:3, disease:'चूर्णिल आसिता', crop:'सरसों', village:'गोपालगढ़, ग्रिड A1', reports:3, confPct:'85%', status:'pending', note:'3 रिपोर्ट, बढ़ती प्रवृत्ति — निगरानी सुझाई गई'},
+  {id:1, diseaseType:'late_blight', crop:'tomato', village:'Rampur, Grid B4', reports:6, confPct:'91%', status:'pending', noteType:'late_blight_note'},
+  {id:2, diseaseType:'stem_borer', crop:'rice', village:'Sohanpur, Grid C2', reports:2, confPct:'64%', status:'pending', noteType:'stem_borer_note'},
+  {id:3, diseaseType:'powdery_mildew', crop:'mustard', village:'Gopalgarh, Grid A1', reports:3, confPct:'85%', status:'pending', noteType:'powdery_mildew_note'},
 ];
-function addExpertCase(pick, status){
-  expertCases.unshift({
-    id: Date.now(),
-    disease: pick.disease,
-    crop: pick.crop,
-    village: 'आपका गाँव, ग्रिड ' + ['A1','B2','B4','C2','C3'][Math.floor(Math.random()*5)],
-    reports: 1,
-    confPct: pick.confPct,
-    status,
-    note: pick.conf==='med' ? 'AI भरोसा कम — किसान द्वारा सीधे भेजा गया' : 'नई रिपोर्ट — समीक्षा लंबित'
-  });
+
+async function loadExpertCases() {
+  const config = getApiConfig();
+  if (!config.useMock) {
+    try {
+      const res = await fetch('/api/database?type=expert');
+      if (res.ok) {
+        const cases = await res.json();
+        if (cases && cases.length > 0) {
+          expertCases = cases;
+        }
+      }
+    } catch(e) {}
+  }
   renderExpertCases();
 }
+
+async function addExpertCaseAndSync(pick, status) {
+  const config = getApiConfig();
+  
+  // Check if disease corresponds to one of the keys, else use it as-is
+  let diseaseType = 'custom';
+  let customDiseaseName = pick.disease;
+  if (pick.disease.includes('झुलसा') || pick.disease.toLowerCase().includes('blight') || pick.disease.includes('करपा')) {
+    diseaseType = 'late_blight';
+  } else if (pick.disease.includes('छेदक') || pick.disease.toLowerCase().includes('borer') || pick.disease.includes('खोड')) {
+    diseaseType = 'stem_borer';
+  } else if (pick.disease.includes('आसिता') || pick.disease.toLowerCase().includes('mildew') || pick.disease.includes('भुरी')) {
+    diseaseType = 'powdery_mildew';
+  }
+
+  let cropKey = 'tomato';
+  if (pick.crop.includes('कांदा') || pick.crop.toLowerCase().includes('onion')) cropKey = 'onion';
+  else if (pick.crop.includes('सोयाबीन') || pick.crop.toLowerCase().includes('soybean')) cropKey = 'soybean';
+  else if (pick.crop.includes('द्राक्षे') || pick.crop.toLowerCase().includes('grapes') || pick.crop.includes('अंगूर')) cropKey = 'grapes';
+  else if (pick.crop.includes('कापूस') || pick.crop.toLowerCase().includes('cotton') || pick.crop.includes('कपास')) cropKey = 'cotton';
+  else if (pick.crop.includes('धान') || pick.crop.toLowerCase().includes('rice') || pick.crop.includes('भात')) cropKey = 'rice';
+  else if (pick.crop.includes('सरसों') || pick.crop.toLowerCase().includes('mustard') || pick.crop.includes('मोहरी')) cropKey = 'mustard';
+
+  const newCase = {
+    id: Date.now(),
+    diseaseType: diseaseType,
+    customDiseaseName: customDiseaseName,
+    crop: cropKey,
+    village: lang === 'en' ? 'Sinnar Taluka, Nashik' : (lang === 'mr' ? 'सिन्नर तालुका, नाशिक' : 'सिन्नर तालुका, नासिक'),
+    reports: 1,
+    confPct: pick.confPct,
+    status: status,
+    noteText: lang === 'en' ? 'Low AI confidence — escalated by farmer' : (lang === 'mr' ? 'AI खात्री कमी — शेतकऱ्याने पाठवलेलाका केस' : 'AI भरोसा कम — किसान द्वारा भेजा गया केस')
+  };
+
+  expertCases.unshift(newCase);
+  renderExpertCases();
+
+  if (!config.useMock) {
+    try {
+      await fetch('/api/database?type=expert', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCase)
+      });
+    } catch(e) {}
+  }
+}
+
+async function updateExpertCaseStatus(id, newStatus) {
+  const c = expertCases.find(x => x.id === id);
+  if (!c) return;
+  c.status = newStatus;
+  
+  const config = getApiConfig();
+  if (!config.useMock) {
+    try {
+      await fetch(`/api/database?type=expert`, {
+        method: "POST", // Will trigger upsert/PATCH in our Netlify function
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus })
+      });
+    } catch(e) {}
+  }
+  renderExpertCases();
+}
+
 function renderExpertCases(){
   const list = document.getElementById('expertList');
   if(!list) return;
-  list.innerHTML = expertCases.map(c=>`
-    <div class="expert-case" data-id="${c.id}">
-      <div class="expert-case-head">
-        <div>
-          <div class="expert-case-title">${c.disease}</div>
-          <div class="expert-case-loc">${c.crop} · ${c.village} · ${c.reports} रिपोर्ट · AI भरोसा ${c.confPct}</div>
+  list.innerHTML = expertCases.map(c=>{
+    // Resolve translations
+    let diseaseName = "";
+    if (c.diseaseType === 'custom') {
+      diseaseName = c.customDiseaseName;
+    } else {
+      diseaseName = (EXPERT_TRANSLATIONS[lang].disease[c.diseaseType]) || c.diseaseType;
+    }
+    const cropName = (EXPERT_TRANSLATIONS[lang].crop[c.crop]) || c.crop;
+    const statusLabel = (EXPERT_TRANSLATIONS[lang][c.status]) || c.status;
+    const noteText = c.noteText || (c.noteType ? EXPERT_TRANSLATIONS[lang].note[c.noteType] : c.note);
+    
+    // Subtitle variables
+    const reportsLabel = lang === 'en' ? 'reports' : (lang === 'mr' ? 'रिपोर्ट' : 'रिपोर्ट');
+    const confidenceLabel = lang === 'en' ? 'AI Conf' : (lang === 'mr' ? 'AI विश्वास' : 'AI भरोसा');
+    
+    const subtitle = `${cropName} · ${c.village} · ${c.reports} ${reportsLabel} · ${confidenceLabel} ${c.confPct}`;
+
+    return `
+      <div class="expert-case" data-id="${c.id}">
+        <div class="expert-case-head">
+          <div>
+            <div class="expert-case-title">${diseaseName}</div>
+            <div class="expert-case-loc">${subtitle}</div>
+          </div>
+          <div class="status-tag ${c.status}">${statusLabel}</div>
         </div>
-        <div class="status-tag ${c.status}">${c.status==='pending'?'लंबित':c.status==='verified'?'सत्यापित':'अस्वीकृत'}</div>
-      </div>
-      <div class="expert-case-body">${c.note}</div>
-      ${c.status==='pending' ? `
-      <div class="expert-actions">
-        <button class="btn-confirm" data-act="confirm" data-id="${c.id}">✓ पुष्टि करें व अलर्ट भेजें</button>
-        <button class="btn-edit" data-act="edit" data-id="${c.id}">✎ सलाह बदलें</button>
-        <button class="btn-reject" data-act="reject" data-id="${c.id}">✕ अस्वीकार करें</button>
-      </div>` : ''}
-    </div>`).join('');
+        <div class="expert-case-body">${noteText}</div>
+        ${c.status==='pending' ? `
+        <div class="expert-actions">
+          <button class="btn-confirm" data-act="confirm" data-id="${c.id}">${STR[lang].expertConfirmBtn}</button>
+          <button class="btn-edit" data-act="edit" data-id="${c.id}">${STR[lang].expertEditBtn}</button>
+          <button class="btn-reject" data-act="reject" data-id="${c.id}">${STR[lang].expertRejectBtn}</button>
+        </div>` : ''}
+      </div>`;
+  }).join('');
 
   list.querySelectorAll('button[data-act]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', async ()=>{
       const id = Number(btn.dataset.id);
       const c = expertCases.find(x=>x.id===id);
       if(!c) return;
-      if(btn.dataset.act === 'confirm'){
-        c.status = 'verified';
-        toast(`✅ सत्यापित — ${c.village} के किसानों को लाल-स्तर अलर्ट भेजा गया`);
-        addFeedItem({title: c.disease + ' — विशेषज्ञ द्वारा सत्यापित', desc: c.village + ' · लाल जोखिम अलर्ट भेजा गया', level:'high'});
-        addMapMarker(c.disease.split(' (')[0], c.crop);
-      } else if(btn.dataset.act === 'reject'){
-        c.status = 'rejected';
-        toast('केस अस्वीकृत — कोई अलर्ट नहीं भेजा जाएगा');
+      
+      let diseaseName = "";
+      if (c.diseaseType === 'custom') {
+        diseaseName = c.customDiseaseName;
       } else {
-        toast('सलाह संपादन खुला (डेमो) — विशेषज्ञ यहाँ सुझाव बदल सकते हैं');
+        diseaseName = (EXPERT_TRANSLATIONS[lang].disease[c.diseaseType]) || c.diseaseType;
       }
-      renderExpertCases();
+      
+      if(btn.dataset.act === 'confirm'){
+        await updateExpertCaseStatus(id, 'verified');
+        toast(STR[lang].expertToastVerified);
+        addFeedItem({
+          type: 'expert_verified',
+          disease: diseaseName,
+          village: c.village,
+          level: 'high'
+        });
+        
+        // Elevate risk on map
+        addMapMarkerAndSync(diseaseName, c.crop);
+      } else if(btn.dataset.act === 'reject'){
+        await updateExpertCaseStatus(id, 'rejected');
+        toast(STR[lang].expertToastRejected);
+      } else {
+        toast(STR[lang].expertToastEdit);
+      }
     });
   });
 }
-renderExpertCases();
 
-/* ================= Voices warm-up for TTS ================= */
+window.addEventListener('load', loadExpertCases);
+
 if('speechSynthesis' in window){
   window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.getVoices(); };
 }
