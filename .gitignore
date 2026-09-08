@@ -5,3 +5,8 @@ dist/
 .env.local
 .env.development
 .env.production
+__pycache__/
+*.py[cod]
+*$py.class
+backend/data/
+

@@ -596,19 +596,25 @@ img{max-width:100%;display:block;}
 
   <!-- ============ SETTINGS MODAL ============ -->
   <div id="settingsModal" class="modal">
-    <div style="background:#fff; border-radius:20px; padding:22px; width:100%; max-width:400px; box-shadow:var(--shadow); position:relative;">
-      <h3 style="margin-top:0; color:var(--forest);">⚙️ API Settings</h3>
-      <p style="font-size:12px; color:var(--ink-soft); margin-bottom:16px;">
-        API keys are securely held on Netlify serverless functions. To override keys locally (for local static testing), paste them here. Stored strictly in your browser storage.
+    <div style="background:#fff; border-radius:20px; padding:22px; width:100%; max-width:420px; box-shadow:var(--shadow); position:relative; max-height:90vh; overflow-y:auto;">
+      <h3 style="margin-top:0; color:var(--forest);">⚙️ AI Engine Settings</h3>
+      <p style="font-size:12px; color:var(--ink-soft); margin-bottom:14px;">
+        Prayas AI runs on an <strong>Open-Source AI Stack</strong> (Fine-tuned LLaVA for vision, Sarvam-1 Indic LLM, Whisper STT, and Edge-TTS). No paid API keys are required when connected to the backend.
       </p>
-      
+
       <div style="margin-bottom:12px;">
-        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Gemini API Key</label>
+        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Hugging Face API Token (Optional, Free)</label>
+        <input type="password" id="localHfToken" placeholder="hf_..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px;">
+        <span style="font-size:10.5px; color:var(--ink-soft);">Used to query Sarvam-1 or LLaVA on Hugging Face Hub.</span>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Legacy Gemini API Key (Optional)</label>
         <input type="password" id="localGeminiKey" placeholder="AIzaSy..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px;">
       </div>
       
-      <div style="margin-bottom:16px;">
-        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Sarvam AI Subscription Key</label>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11.5px; font-weight:700; display:block; margin-bottom:4px;">Legacy Sarvam Cloud Key (Optional)</label>
         <input type="password" id="localSarvamKey" placeholder="sk_..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px;">
       </div>
 
@@ -619,7 +625,7 @@ img{max-width:100%;display:block;}
       
       <div style="display:flex; gap:10px;">
         <button class="btn btn-outline" id="closeSettingsBtn" style="padding:10px; flex:1;">Close</button>
-        <button class="btn btn-primary" id="saveSettingsBtn" style="padding:10px; flex:1;">Save Keys</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="padding:10px; flex:1;">Save Settings</button>
       </div>
     </div>
   </div>
@@ -1047,12 +1053,14 @@ let lang = 'hi';
 
 /* ================= Local Keys / Settings ================= */
 function loadLocalConfig() {
+  document.getElementById('localHfToken').value = localStorage.getItem('prayas_hf_token') || '';
   document.getElementById('localGeminiKey').value = localStorage.getItem('prayas_gemini_key') || '';
   document.getElementById('localSarvamKey').value = localStorage.getItem('prayas_sarvam_key') || '';
   document.getElementById('useMockMode').checked = localStorage.getItem('prayas_mock_mode') === 'true';
 }
 
 function saveLocalConfig() {
+  localStorage.setItem('prayas_hf_token', document.getElementById('localHfToken').value.trim());
   localStorage.setItem('prayas_gemini_key', document.getElementById('localGeminiKey').value.trim());
   localStorage.setItem('prayas_sarvam_key', document.getElementById('localSarvamKey').value.trim());
   localStorage.setItem('prayas_mock_mode', document.getElementById('useMockMode').checked ? 'true' : 'false');
@@ -1062,6 +1070,7 @@ function saveLocalConfig() {
 
 function getApiConfig() {
   return {
+    hfToken: localStorage.getItem('prayas_hf_token') || '',
     geminiKey: localStorage.getItem('prayas_gemini_key') || '',
     sarvamKey: localStorage.getItem('prayas_sarvam_key') || '',
     useMock: localStorage.getItem('prayas_mock_mode') === 'true'
@@ -1447,7 +1456,7 @@ async function playBase64Audio(base64Data) {
   }
 }
 
-// Call Serverless TTS / Direct TTS
+// Call Open-Source / Serverless TTS (Edge-TTS / Sarvam fallback)
 async function synthesizeAndPlayTTS(textPayload) {
   const config = getApiConfig();
   const langCode = lang === 'hi' ? 'hi-IN' : (lang === 'mr' ? 'mr-IN' : 'en-IN');
@@ -1459,8 +1468,24 @@ async function synthesizeAndPlayTTS(textPayload) {
 
   try {
     let audioBase64 = '';
-    if (config.sarvamKey) {
-      // Direct call
+
+    // 1. Try Open-Source Backend /api/tts (Edge-TTS: Free, authentic Marathi & Hindi neural voice)
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textPayload, language_code: langCode })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        audioBase64 = (json.audios && json.audios[0]) || json.audio || "";
+      }
+    } catch (e) {
+      console.warn("Open-source /api/tts unreachable, trying fallback...");
+    }
+
+    // 2. Fallback to Direct Sarvam Key if configured
+    if (!audioBase64 && config.sarvamKey) {
       let speaker = lang === 'mr' ? "ananya" : "shubh";
       const res = await fetch("https://api.sarvam.ai/text-to-speech", {
         method: "POST",
@@ -1472,19 +1497,23 @@ async function synthesizeAndPlayTTS(textPayload) {
       });
       if (res.ok) {
         const json = await res.json();
-        audioBase64 = json.audio;
+        audioBase64 = (json.audios && json.audios[0]) || json.audio || "";
       }
-    } else {
-      // Serverless Proxy call
-      const res = await fetch("/api/sarvam-tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: textPayload, language_code: langCode })
-      });
-      if (res.ok) {
-        const json = await res.json();
-        audioBase64 = json.audio;
-      }
+    }
+
+    // 3. Fallback to Serverless Proxy call
+    if (!audioBase64) {
+      try {
+        const res = await fetch("/api/sarvam-tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: textPayload, language_code: langCode })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          audioBase64 = (json.audios && json.audios[0]) || json.audio || "";
+        }
+      } catch (e) {}
     }
 
     if (audioBase64) {
@@ -1498,8 +1527,7 @@ async function synthesizeAndPlayTTS(textPayload) {
   }
 }
 
-// Call Serverless STT / Direct STT
-// Call Serverless STT / Direct STT
+// Call Open-Source / Serverless STT (Whisper / Sarvam fallback)
 async function transcribeAudio(base64Audio) {
   const config = getApiConfig();
   if (config.useMock) {
@@ -1507,6 +1535,25 @@ async function transcribeAudio(base64Audio) {
   }
 
   try {
+    // 1. Try Open-Source Backend /api/stt (Whisper)
+    try {
+      const langCode = lang === 'hi' ? 'hi-IN' : (lang === 'mr' ? 'mr-IN' : 'en-IN');
+      const headers = { "Content-Type": "application/json" };
+      if (config.hfToken) headers["X-HF-Token"] = config.hfToken;
+      const res = await fetch("/api/stt", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ audio: base64Audio, mimeType: "audio/wav", language_code: langCode })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.transcript) return json.transcript;
+      }
+    } catch (e) {
+      console.warn("Open-source /api/stt unreachable, trying fallback...");
+    }
+
+    // 2. Direct Sarvam Key
     if (config.sarvamKey) {
       const formData = new FormData();
       const audioBuffer = Uint8Array.from(atob(base64Audio), c => c.charCodeAt(0));
@@ -1524,6 +1571,7 @@ async function transcribeAudio(base64Audio) {
         return json.transcript || "";
       }
     } else {
+      // 3. Serverless Netlify proxy
       const res = await fetch("/api/sarvam-stt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1540,13 +1588,38 @@ async function transcribeAudio(base64Audio) {
   return lang === 'en' ? "Tomato leaves are turning yellow" : (lang === 'mr' ? "टोमॅटोची पाने पिवळी पडत आहेत" : "टमाटर के पत्ते पीले पड़ रहे हैं");
 }
 
-function handleVoiceInput(saidText) {
+// Dynamic Farmer Advisory powered by Sarvam-1 (sarvamai/sarvam-1 Indic LLM)
+async function handleVoiceInput(saidText) {
   transcriptText.textContent = saidText;
   heroTranscript.classList.add('show');
   
-  const reply = craftQueryReply(saidText);
-  replyText.textContent = reply;
+  // Show thinking feedback
+  const thinkingMsg = lang === 'en' ? 'Thinking with Sarvam-1...' : (lang === 'mr' ? 'सर्वम AI विचार करत आहे...' : 'सर्वम AI विचार कर रहा है...');
+  replyText.textContent = thinkingMsg;
   heroReply.style.display = 'block';
+
+  let reply = "";
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (config.hfToken) headers["X-HF-Token"] = config.hfToken;
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ message: saidText, lang: lang })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      reply = data.reply || "";
+    }
+  } catch (e) {
+    console.warn("Sarvam-1 chat failed, falling back to local heuristic rules:", e);
+  }
+
+  if (!reply || reply.includes("thinking")) {
+    reply = craftQueryReply(saidText);
+  }
+
+  replyText.textContent = reply;
   synthesizeAndPlayTTS(reply);
   addFeedItem({ type: 'voice_query', desc: saidText, level: 'low' });
 }
@@ -1959,7 +2032,23 @@ async function runGeminiDiagnosis(base64Image, mimeType) {
     throw new Error("Forced mock fallback by user setting");
   }
 
-  // Direct Call
+  // 1. Try Open-Source LLaVA / Vision Diagnosis Backend
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (config.hfToken) headers["X-HF-Token"] = config.hfToken;
+    const osResponse = await fetch("/api/diagnose", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ image: base64Image, mimeType: mimeType || "image/jpeg", lang: lang })
+    });
+    if (osResponse.ok) {
+      return await osResponse.json();
+    }
+  } catch (e) {
+    console.warn("Open-source /api/diagnose endpoint unavailable, falling back...", e);
+  }
+
+  // 2. Direct Gemini Call (if API key provided)
   if (config.geminiKey) {
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.geminiKey}`;
     const targetLang = lang || 'hi';
@@ -2008,7 +2097,7 @@ async function runGeminiDiagnosis(base64Image, mimeType) {
     return JSON.parse(txt.trim());
   }
 
-  // Serverless Proxy Call
+  // 3. Serverless Proxy Call fallback
   const response = await fetch("/api/gemini", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

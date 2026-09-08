@@ -71,65 +71,39 @@ The diagram below represents how agricultural data flows from the field, through
 
 ---
 
-## 4. Technical Architecture
+## 4. Technical Architecture (Open-Source AI Stack)
 
 - **Frontend**: Vanilla HTML5, CSS3, Javascript (PWA with Service Worker offline shell caching).
 - **Backend Map**: Leaflet.js mapping library (OpenStreetMap tiles).
-- **Serverless API Proxy**: Netlify Functions (Node.js) to keep API credentials secure.
-- **Database**: Supabase (PostgreSQL / PostGIS for geospatial grid clustering) with an ephemeral in-memory storage fallback.
-- **AI Integrations**: Gemini Multimodal API (Multimodal diagnostics) & Sarvam AI REST API (STT Saaras + TTS Bulbul).
+- **AI Backend Engine**: FastAPI (Python 3.10+) serving open-source AI models and PWA static assets.
+- **Crop Vision Diagnosis**: Fine-tuned **LLaVA-1.5-7B** / **SmolVLM** trained on Kaggle Indian crop disease datasets (replaces Google Gemini).
+- **Voice Assistant**: **`sarvamai/sarvam-1`** (2B Indic LLM on Hugging Face) for regional farming Q&A.
+- **Voice Engine (STT & TTS)**: OpenAI **Whisper** (Speech-to-Text) and **Edge-TTS** (Text-to-Speech in authentic Marathi `mr-IN-AarohiNeural` and Hindi `hi-IN-MadhurNeural`), 100% free with zero API keys required.
+- **Database**: Local JSON storage fallback or Supabase PostgreSQL.
 
 ---
 
-## 5. Security & Credentials Setup
+## 5. Free Deployment & Running Locally
 
-To keep API keys safe, the PWA uses a serverless proxy pattern. The keys are stored inside environment variables on Netlify and are never exposed to the client browser.
+For complete free deployment guides on **Hugging Face Spaces** (Free Docker 16GB RAM) and **Render Free Tier**, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
-### A. Environment Variables
-For local testing or production deployments, configure these environment variables:
+### Run Locally with Open-Source Backend (No Cloud Keys Required)
 
-```env
-GEMINI_API_KEY=your_gemini_api_key
-SARVAM_API_KEY=your_sarvam_api_key
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_service_role_key
+```bash
+# 1. Install dependencies
+pip install -r backend/requirements.txt
+
+# 2. Start the unified AI server & PWA
+python backend/main.py
 ```
-
-### B. Local Developer settings Panel
-For static offline development without Netlify CLI:
-1. Open the app in browser.
-2. Click the gear icon (**⚙️**) on the top bar.
-3. Paste your API keys directly into the modal (stored securely in browser `localStorage`).
-4. Toggle **"Use Local Offline Demo Data"** if you wish to run completely mock-based.
+Open `http://localhost:8000` in your browser.
 
 ---
 
-## 6. How to Run Locally
+## 6. Fine-Tuning LLaVA on Kaggle
 
-### Prerequisites
-Install the Netlify CLI:
-```bash
-npm install -g netlify-cli
-```
-
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/Harshita-Dargan/prayas-ai.git
-cd prayas-ai
-```
-
-### Step 2: Configure Environment Keys
-Create a `.env` file at the root of the workspace:
-```bash
-GEMINI_API_KEY=your_gemini_key
-SARVAM_API_KEY=your_sarvam_key
-```
-
-### Step 3: Run the Local Dev Server
-```bash
-netlify dev
-```
-This launches a local server (typically at `http://localhost:8888`) that serves the static frontend inside the `prayas-ai` folder and hosts the serverless functions under `/api/` matching the `netlify.toml` rules.
+To train your own LLaVA model on Indian crop disease datasets using Kaggle's free GPU quota:
+See [training/README.md](training/README.md) and [training/kaggle_train_llava.py](training/kaggle_train_llava.py).
 
 ---
 
