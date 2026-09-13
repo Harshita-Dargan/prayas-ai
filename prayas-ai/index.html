@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://meet.jit.si/external_api.js"></script>
 
 <style>
 :root{
@@ -317,6 +318,7 @@ img{max-width:100%;display:block;}
         </div>
       </div>
       <div class="top-actions">
+        <a href="expert.html" class="lang-pill" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.22); color:#fff;" title="KVK Expert Portal">🧑‍🌾 KVK</a>
         <button class="lang-pill" id="langBtn">हिंदी</button>
         <button class="icon-btn" id="bellBtn">🔔</button>
         <button class="icon-btn" id="settingsBtn" style="font-size:14px;">⚙️</button>
@@ -450,13 +452,24 @@ img{max-width:100%;display:block;}
         <div class="lbl" id="serviceAlertsTitle">WhatsApp सहायक</div>
         <div class="sub" id="serviceAlertsSub">वॉइस नोट भेजें</div>
       </div>
-      <div class="tile g1" onclick="goTo('expert')" style="grid-column:1 / -1;">
+      <div class="tile g1" onclick="openFarmerVideoModal()" style="grid-column:1 / -1; cursor:pointer; background:linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%); color:#fff; border:none; box-shadow:0 8px 20px -6px rgba(27,67,50,0.4);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="ic" style="margin:0; background:rgba(255,255,255,0.2); color:#fff; font-size:24px;">📹</div>
+          <div style="flex:1;">
+            <div class="lbl" id="serviceVideoTitle" style="color:#fff; font-size:15px;">KVK तज्ज्ञ व्हिडिओ कॉल (Live Agronomist Call)</div>
+            <div class="sub" id="serviceVideoSub" style="color:rgba(255,255,255,0.85); font-size:11.5px;">मोफत थेट शेती सल्ला • रोगाचे कॅमेऱ्यातून थेट परीक्षण (Zero Cost)</div>
+          </div>
+          <div style="font-size:18px; font-weight:700; color:#E8A33D;">➔</div>
+        </div>
+      </div>
+      <div class="tile g1" onclick="window.location.href='expert.html'" style="grid-column:1 / -1; cursor:pointer;">
         <div style="display:flex; align-items:center; gap:12px;">
           <div class="ic" style="margin:0;">🧑‍🌾</div>
-          <div>
+          <div style="flex:1;">
             <div class="lbl" id="serviceExpertTitle">विशेषज्ञ सत्यापन डैशबोर्ड</div>
-            <div class="sub" id="serviceExpertSub">कृषि विज्ञान केंद्र (KVK) कृषि अधिकारी लॉगिन</div>
+            <div class="sub" id="serviceExpertSub">कृषि विज्ञान केंद्र (KVK) कृषि अधिकारी पोर्टल · सीधा प्रवेश (Zero Auth)</div>
           </div>
+          <div style="font-size:16px; font-weight:700; color:var(--forest);">➔</div>
         </div>
       </div>
     </div>
@@ -499,16 +512,26 @@ img{max-width:100%;display:block;}
 
       <div class="uncertain-box" id="uncertainBox">
         <span id="scanUncertainText">🤔 भरोसा कम है। एक और साफ़ फ़ोटो भेजें, या सीधे विशेषज्ञ को केस भेजें।</span>
-        <div style="margin-top:8px; display:flex; gap:8px;">
-          <button class="btn btn-outline" style="padding:9px;" id="retakeBtn">📷 दोबारा फ़ोटो लें</button>
-          <button class="btn btn-primary" style="padding:9px;" id="sendExpertBtn">🧑‍🌾 विशेषज्ञ को भेजें</button>
+        <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline" style="padding:9px; flex:1;" id="retakeBtn">📷 दोबारा फ़ोटो लें</button>
+            <button class="btn btn-turmeric" style="padding:9px; flex:1;" id="sendExpertBtn">🧑‍🌾 विशेषज्ञ को भेजें</button>
+          </div>
+          <button class="btn btn-primary" style="padding:10px; background:linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);" id="btnScanVideoCall" onclick="startScanVideoConsultation()">
+            <span>📹</span>
+            <span id="btnScanVideoCallText">KVK तज्ज्ञांशी थेट व्हिडिओ कॉल करा (Instant Video Call)</span>
+          </button>
         </div>
       </div>
 
       <div class="planner" id="plannerBox"></div>
 
-      <div class="result-actions" id="resultActionsRow">
+      <div class="result-actions" id="resultActionsRow" style="flex-direction:column; gap:8px;">
         <button class="btn btn-turmeric" id="alertNearbyBtn">📢 समुदाय रिपोर्ट में जोड़ें</button>
+        <button class="btn btn-primary" onclick="startScanVideoConsultation()" style="background:linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);">
+          <span>📹</span>
+          <span id="btnActionVideoConsultText">KVK तज्ज्ञ थेट व्हिडिओ सल्ला (Plant Telemedicine)</span>
+        </button>
       </div>
       <div class="privacy-note" id="privacyNote">🔒 आपके खेत का स्थान छुपाया जाएगा — केवल गाँव/ग्रिड स्तर पर दिखेगा।</div>
       <button class="btn btn-outline" style="margin-top:10px;" id="rescanBtn">🔁 दोबारा स्कैन करें</button>
@@ -589,8 +612,18 @@ img{max-width:100%;display:block;}
 
   <!-- ============ EXPERT DASHBOARD ============ -->
   <div class="screen" id="screen-expert">
-    <h2 id="expertTitle" style="margin:4px 0 4px;">विशेषज्ञ सत्यापन डैशबोर्ड</h2>
-    <p id="expertSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px;">KVK कार्यकर्ता / कृषि अधिकारी यहाँ AI के अनुमान की पुष्टि करते हैं, जिससे समुदाय को सत्यापित लाल-श्रेणी चेतावनी भेजी जा सके।</p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+      <div>
+        <h2 id="expertTitle" style="margin:4px 0 4px;">विशेषज्ञ सत्यापन डैशबोर्ड</h2>
+        <p id="expertSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 12px;">KVK कार्यकर्ता / कृषि अधिकारी यहाँ AI के अनुमान की पुष्टि करते हैं, जिससे समुदाय को सत्यापित लाल-श्रेणी चेतावनी भेजी जा सके।</p>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <a href="expert.html" class="btn btn-primary" style="display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; padding:12px 16px; font-weight:700; font-size:14px; box-shadow:var(--shadow);">
+        <span>📊</span>
+        <span>पूर्ण KVK विशेषज्ञ डैशबोर्ड व ग्राफिकल विश्लेषण खोलें ➔</span>
+      </a>
+    </div>
     <div id="expertList"></div>
     <div class="pill-note">This dashboard protects farmers from false-alert fatigue. Trigger alerts and add them directly to the map by confirming cases.</div>
   </div>
@@ -627,6 +660,68 @@ img{max-width:100%;display:block;}
       <div style="display:flex; gap:10px;">
         <button class="btn btn-outline" id="closeSettingsBtn" style="padding:10px; flex:1;">Close</button>
         <button class="btn btn-primary" id="saveSettingsBtn" style="padding:10px; flex:1;">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FARMER VIDEO CONSULTATION MODAL ============ -->
+  <div id="farmerVideoModal" class="modal" style="padding:12px; z-index:2100;">
+    <div style="background:#fff; border-radius:24px; width:100%; max-width:460px; box-shadow:var(--shadow); position:relative; max-height:92vh; display:flex; flex-direction:column; overflow:hidden;">
+      
+      <!-- Video Header -->
+      <div style="background:linear-gradient(135deg, var(--forest) 0%, var(--forest-deep) 100%); color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:34px; height:34px; border-radius:10px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:18px;">📹</div>
+          <div>
+            <b style="font-size:14px; display:block;" id="farmerModalTitle">KVK कृषी वैज्ञानिक व्हिडिओ सल्ला</b>
+            <span style="font-size:11px; opacity:0.85;" id="farmerModalSub">थेट संवाद · 100% मोफत (Open-Source WebRTC)</span>
+          </div>
+        </div>
+        <button onclick="closeFarmerVideoModal()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:4px;">✕</button>
+      </div>
+
+      <!-- Live Video Viewport -->
+      <div style="position:relative; width:100%; height:320px; background:#122C22; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+        <div id="jitsiFarmerContainer" style="width:100%; height:100%;"></div>
+        <div id="videoFarmerFallback" style="display:none; width:100%; height:100%; position:relative;">
+          <iframe id="iframeFarmerFallback" allow="camera; microphone; fullscreen; display-capture" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
+        <!-- Status Overlay -->
+        <div id="farmerCallStatusOverlay" style="position:absolute; top:12px; left:12px; background:rgba(18,44,34,0.85); backdrop-filter:blur(6px); color:#fff; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; gap:6px;">
+          <span style="width:8px; height:8px; border-radius:50%; background:#7CDB9C; display:inline-block; animation:pulseMic 1.2s infinite;"></span>
+          <span id="farmerCallStatusText">KVK तज्ज्ञ कक्षाशी जोडले आहे...</span>
+        </div>
+      </div>
+
+      <!-- Controls & Live Prescription Drawer -->
+      <div style="padding:14px 16px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px;">
+        
+        <!-- Camera & Audio Action Strip -->
+        <div style="display:flex; gap:8px;">
+          <button id="btnFlipFarmerCamera" onclick="flipFarmerCamera()" class="btn btn-outline" style="padding:9px 12px; font-size:12.5px; border-radius:12px; flex:1;">
+            <span>🔄</span> <span id="txtFlipCamera">कॅमेरा बदला (मागील/पुढील)</span>
+          </button>
+          <button onclick="closeFarmerVideoModal()" class="btn" style="background:#FCEBE6; color:var(--red); padding:9px 14px; font-size:12.5px; border-radius:12px; width:auto;">
+            <span>❌</span> <span>कॉल बंद</span>
+          </button>
+        </div>
+
+        <div style="font-size:11.5px; color:var(--ink-soft); line-height:1.4; background:var(--paper-dim); padding:8px 12px; border-radius:10px; border:1px solid var(--line);">
+          💡 <b>टीप:</b> झाडाची पाने किंवा कीड स्पष्ट दिसण्यासाठी तुमच्या फोनचा मागील कॅमेरा (Back Camera) निवडा.
+        </div>
+
+        <!-- Live Digital Prescription pushed from Expert -->
+        <div id="livePrescriptionCard" style="display:none; background:#EAF5EE; border:1.5px solid var(--leaf); border-radius:14px; padding:12px 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <b style="font-size:12px; color:var(--forest); text-transform:uppercase; letter-spacing:0.5px;">📋 KVK प्रमाणित डिजिटल प्रिस्क्रिप्शन</b>
+            <span style="font-size:10.5px; background:var(--forest); color:#fff; padding:2px 8px; border-radius:999px;">आताच मिळाले</span>
+          </div>
+          <div style="font-size:14px; font-weight:700; color:var(--forest); margin-bottom:4px;" id="rxDiagnosisName">—</div>
+          <div style="font-size:12px; color:var(--ink); margin-bottom:4px;" id="rxBioAdvice">—</div>
+          <div style="font-size:12px; color:var(--ink); margin-bottom:4px;" id="rxChemAdvice">—</div>
+          <div style="font-size:11px; font-weight:700; color:var(--red);" id="rxPhiAdvice">—</div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -2858,6 +2953,158 @@ function renderExpertCases(){
 }
 
 window.addEventListener('load', loadExpertCases);
+
+/* ================= Farmer Video Consultation Logic (WebRTC / Jitsi Meet) ================= */
+let farmerJitsiApi = null;
+let currentFarmerRoomId = null;
+let farmerPrescriptionPollTimer = null;
+let isFrontCamera = false;
+
+async function openFarmerVideoModal(cropName, diseaseName) {
+  const modal = document.getElementById('farmerVideoModal');
+  modal.classList.add('show');
+
+  const crop = cropName || (window._lastScan ? window._lastScan.crop : "टोमॅटो (Tomato)");
+  const disease = diseaseName || (window._lastScan ? window._lastScan.disease : "पानांवरील करपा रोग (Late Blight)");
+
+  document.getElementById('farmerCallStatusText').textContent = lang === 'en' ? "Connecting to KVK Scientist..." : (lang === 'mr' ? "KVK कृषी वैज्ञानिक कक्षाशी जोडले जात आहे..." : "KVK कृषि वैज्ञानिक कक्ष से जोड़ा जा रहा है...");
+  document.getElementById('livePrescriptionCard').style.display = 'none';
+
+  // Request / Register teleconsultation room
+  let roomId = "prayas-kvk-room-101";
+  try {
+    const res = await fetch('/api/teleconsult/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        farmerName: lang === 'en' ? "Field Farmer (नाशिक)" : (lang === 'mr' ? "शेतकरी (नाशिक)" : "किसान साथी (नासिक)"),
+        village: "Nashik Rural, Grid B4",
+        crop: crop,
+        symptom: disease,
+        aiConfidence: (window._lastScan && window._lastScan.confPct) || "85%",
+        language: lang
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.room && data.room.roomId) {
+        roomId = data.room.roomId;
+      }
+    }
+  } catch(e) {
+    console.warn("Using local room session:", roomId);
+  }
+
+  currentFarmerRoomId = roomId;
+
+  // Initialize Jitsi Meet embedded call
+  const container = document.getElementById('jitsiFarmerContainer');
+  const fallback = document.getElementById('videoFarmerFallback');
+  const iframe = document.getElementById('iframeFarmerFallback');
+  container.innerHTML = '';
+
+  if (window.JitsiMeetExternalAPI) {
+    try {
+      if (farmerJitsiApi) farmerJitsiApi.dispose();
+      container.style.display = 'block';
+      fallback.style.display = 'none';
+
+      const domain = "meet.jit.si";
+      const options = {
+        roomName: roomId,
+        parentNode: container,
+        width: "100%",
+        height: "100%",
+        userInfo: { displayName: lang === 'en' ? "Farmer (शेतकरी)" : "शेतकरी (Farmer)" },
+        configOverwrite: {
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
+          prejoinPageEnabled: false,
+          disableDeepLinking: true
+        },
+        interfaceConfigOverwrite: {
+          TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'chat', 'camera-flip', 'tileview']
+        }
+      };
+      farmerJitsiApi = new window.JitsiMeetExternalAPI(domain, options);
+      farmerJitsiApi.addEventListeners({
+        videoConferenceJoined: function() {
+          document.getElementById('farmerCallStatusText').textContent = lang === 'en' ? "Connected with KVK Agronomist" : (lang === 'mr' ? "🟢 KVK शास्त्रज्ञांशी जोडले गेले" : "🟢 KVK वैज्ञानिक से जुड़े");
+        },
+        videoConferenceLeft: function() {
+          closeFarmerVideoModal();
+        }
+      });
+    } catch(err) {
+      console.warn("Jitsi API fallback to iframe:", err);
+      container.style.display = 'none';
+      fallback.style.display = 'block';
+      iframe.src = `https://meet.jit.si/${roomId}#config.prejoinPageEnabled=false&config.startWithAudioMuted=false`;
+    }
+  } else {
+    container.style.display = 'none';
+    fallback.style.display = 'block';
+    iframe.src = `https://meet.jit.si/${roomId}#config.prejoinPageEnabled=false&config.startWithAudioMuted=false`;
+  }
+
+  // Poll for prescription push from expert
+  startPollingPrescription(roomId);
+}
+
+function startScanVideoConsultation() {
+  const last = window._lastScan;
+  const crop = last ? last.crop : "टोमॅटो";
+  const disease = last ? last.disease : "रोग शंका";
+  openFarmerVideoModal(crop, disease);
+}
+
+function flipFarmerCamera() {
+  isFrontCamera = !isFrontCamera;
+  if (farmerJitsiApi) {
+    try {
+      farmerJitsiApi.executeCommand('toggleCamera');
+    } catch(e) {}
+  }
+  toast(lang === 'en' ? "🔄 Camera flipped (showing crop leaf)" : (lang === 'mr' ? "🔄 कॅमेरा बदलला (पाने दाखवा)" : "🔄 कैमरा बदला (पत्ती दिखाएँ)"));
+}
+
+function startPollingPrescription(roomId) {
+  clearInterval(farmerPrescriptionPollTimer);
+  farmerPrescriptionPollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/teleconsult/${roomId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.prescription) {
+          clearInterval(farmerPrescriptionPollTimer);
+          showPrescriptionCard(data.prescription);
+        }
+      }
+    } catch(e) {}
+  }, 4000);
+}
+
+function showPrescriptionCard(p) {
+  const card = document.getElementById('livePrescriptionCard');
+  if (!card) return;
+  document.getElementById('rxDiagnosisName').textContent = "🔍 " + (p.diagnosis || "Late Blight");
+  document.getElementById('rxBioAdvice').textContent = "🌱 जैविक: " + (p.bioRemedy || "10,000 PPM Neem Oil @ 5ml/L");
+  document.getElementById('rxChemAdvice').textContent = "🧪 औषध: " + (p.chemRemedy || "Copper Oxychloride @ 2.5g/L");
+  document.getElementById('rxPhiAdvice').textContent = "⏳ " + (p.phi || "7 days pre-harvest safety interval");
+  card.style.display = 'block';
+  toast(lang === 'en' ? "📋 Certified Prescription Received!" : (lang === 'mr' ? "📋 तज्ज्ञांकडून प्रमाणित प्रिस्क्रिप्शन मिळाले!" : "📋 विशेषज्ञ से प्रमाणित प्रिस्क्रिप्शन प्राप्त हुआ!"));
+}
+
+function closeFarmerVideoModal() {
+  clearInterval(farmerPrescriptionPollTimer);
+  if (farmerJitsiApi) {
+    try { farmerJitsiApi.dispose(); } catch(e){}
+    farmerJitsiApi = null;
+  }
+  const iframe = document.getElementById('iframeFarmerFallback');
+  if (iframe) iframe.src = '';
+  document.getElementById('farmerVideoModal').classList.remove('show');
+}
 
 if('speechSynthesis' in window){
   window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.getVoices(); };
