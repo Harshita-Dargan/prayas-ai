@@ -6,3 +6,14 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+[[redirects]]
+  from = "/expert"
+  to = "/expert.html"
+  status = 200
+
+[[redirects]]
+  from = "/kavk"
+  to = "/expert.html"
+  status = 200
+

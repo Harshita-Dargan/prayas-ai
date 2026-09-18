@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
@@ -316,6 +317,7 @@ img{max-width:100%;display:block;}
         </div>
       </div>
       <div class="top-actions">
+        <a href="expert.html" class="lang-pill" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.22); color:#fff;" title="KVK Expert Portal">🧑‍🌾 KVK</a>
         <button class="lang-pill" id="langBtn">हिंदी</button>
         <button class="icon-btn" id="bellBtn">🔔</button>
         <button class="icon-btn" id="settingsBtn" style="font-size:14px;">⚙️</button>
@@ -449,13 +451,17 @@ img{max-width:100%;display:block;}
         <div class="lbl" id="serviceAlertsTitle">WhatsApp सहायक</div>
         <div class="sub" id="serviceAlertsSub">वॉइस नोट भेजें</div>
       </div>
-      <div class="tile g1" onclick="goTo('expert')" style="grid-column:1 / -1;">
+      <div class="tile g1" onclick="goTo('expert')" style="grid-column:1 / -1; cursor:pointer; background:linear-gradient(135deg, #F5FBF6 0%, #E7F3E9 100%); border:1.5px solid var(--leaf); box-shadow:0 6px 18px -8px rgba(27,67,50,0.25);">
         <div style="display:flex; align-items:center; gap:12px;">
-          <div class="ic" style="margin:0;">🧑‍🌾</div>
-          <div>
-            <div class="lbl" id="serviceExpertTitle">विशेषज्ञ सत्यापन डैशबोर्ड</div>
-            <div class="sub" id="serviceExpertSub">कृषि विज्ञान केंद्र (KVK) कृषि अधिकारी लॉगिन</div>
+          <div class="ic" style="margin:0; background:var(--forest); color:#fff; font-size:22px;">🧑‍🌾</div>
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="lbl" id="serviceExpertTitle" style="color:var(--forest);">विशेषज्ञ सत्यापन डैशबोर्ड</div>
+              <span style="font-size:10px; font-weight:800; background:var(--turmeric); color:#fff; padding:2px 7px; border-radius:999px; letter-spacing:0.3px;">KVK LIVE</span>
+            </div>
+            <div class="sub" id="serviceExpertSub">कृषि विज्ञान केंद्र (KVK) डेटा विज़ुअलाइज़ेशन व ट्राइएज कमान कक्ष</div>
           </div>
+          <div style="font-size:16px; font-weight:700; color:var(--forest);">➔</div>
         </div>
       </div>
     </div>
@@ -586,12 +592,103 @@ img{max-width:100%;display:block;}
     <div class="pill-note">Interactive Simulator: Clicking the microphone will record your actual voice, send it to Sarvam STT, process it, and generate a regional voice note answer from Sarvam TTS.</div>
   </div>
 
-  <!-- ============ EXPERT DASHBOARD ============ -->
+  <!-- ============ VISUALISED KVK EXPERT DASHBOARD ============ -->
   <div class="screen" id="screen-expert">
-    <h2 id="expertTitle" style="margin:4px 0 4px;">विशेषज्ञ सत्यापन डैशबोर्ड</h2>
-    <p id="expertSub" style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px;">KVK कार्यकर्ता / कृषि अधिकारी यहाँ AI के अनुमान की पुष्टि करते हैं, जिससे समुदाय को सत्यापित लाल-श्रेणी चेतावनी भेजी जा सके।</p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:24px;">🔬</span>
+          <h2 id="expertTitle" style="margin:0; font-size:20px; color:var(--forest);">KVK विशेषज्ञ डैशबोर्ड</h2>
+        </div>
+        <p id="expertSub" style="font-size:12.5px; color:var(--ink-soft); margin:4px 0 0;">कृषि विज्ञान केंद्र (KVK) नाशिक — लाइव फसल रोग निगरानी, विज़ुअलाइज़ेशन व सत्यापन कमान कक्ष</p>
+      </div>
+    </div>
+
+    <!-- Direct Fullscreen KVK Portal Button -->
+    <div style="margin-bottom:16px;">
+      <a href="expert.html" class="btn btn-primary" style="display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; padding:13px 16px; font-weight:700; font-size:13.5px; box-shadow:var(--shadow); background:linear-gradient(135deg, var(--forest) 0%, var(--leaf) 100%);">
+        <span>🖥️</span>
+        <span id="btnOpenFullKvk">पूर्ण KVK कमांड सेंटर खोलें (Full Desktop Portal) ➔</span>
+      </a>
+    </div>
+
+    <!-- KVK Key Performance Indicators Strip -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+      <div style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; border-left:4px solid var(--forest); box-shadow:0 4px 10px -6px rgba(27,67,50,0.15);">
+        <div style="font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase;" id="kpiTotalReportsTitle">कुल किसान रिपोर्ट</div>
+        <div style="font-size:22px; font-weight:800; color:var(--forest); margin:4px 0 2px;" id="kpiValReports">148</div>
+        <div style="font-size:10.5px; color:var(--green); font-weight:600;">▲ +14% पिछले 7 दिन</div>
+      </div>
+      <div style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; border-left:4px solid var(--red); box-shadow:0 4px 10px -6px rgba(193,68,14,0.15);">
+        <div style="font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase;" id="kpiHotspotsTitle">सक्रिय हॉटस्पॉट</div>
+        <div style="font-size:22px; font-weight:800; color:var(--red); margin:4px 0 2px;" id="kpiValHotspots">3</div>
+        <div style="font-size:10.5px; color:var(--red); font-weight:600;">⚠️ निफाड व सिन्नर ग्रिड</div>
+      </div>
+      <div style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; border-left:4px solid var(--turmeric); box-shadow:0 4px 10px -6px rgba(232,163,61,0.15);">
+        <div style="font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase;" id="kpiPendingTitle">लंबित सत्यापन</div>
+        <div style="font-size:22px; font-weight:800; color:var(--turmeric-deep); margin:4px 0 2px;" id="kpiValPending">3</div>
+        <div style="font-size:10.5px; color:var(--turmeric-deep); font-weight:600;">AI कम भरोसा / फॉलोअप</div>
+      </div>
+      <div style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; border-left:4px solid var(--green); box-shadow:0 4px 10px -6px rgba(63,125,88,0.15);">
+        <div style="font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase;" id="kpiBroadcastTitle">सत्यापित अलर्ट</div>
+        <div style="font-size:22px; font-weight:800; color:var(--green); margin:4px 0 2px;" id="kpiValBroadcast">12</div>
+        <div style="font-size:10.5px; color:var(--green); font-weight:600;">✓ 4,250+ किसान सूचित</div>
+      </div>
+    </div>
+
+    <!-- Filter Control by Taluka / Area -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px; background:#fff; padding:10px 14px; border-radius:12px; border:1px solid var(--line);">
+      <span style="font-size:12px; font-weight:700; color:var(--ink-soft);" id="lblTalukaSelect">तालुका / क्षेत्र चुनें:</span>
+      <select id="kvkTalukaFilter" onchange="onKvkTalukaChange(this.value)" style="border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; color:var(--forest); background:#FAF8F2; outline:none;">
+        <option value="all">सर्व नाशिक जिल्हा (All Talukas)</option>
+        <option value="niphad">निफाड (Niphad - Grape Belt)</option>
+        <option value="sinnar">सिन्नर (Sinnar - Tomato/Onion)</option>
+        <option value="dindori">दिंडोरी (Dindori - Vineyard)</option>
+        <option value="yeola">येवला (Yeola - Cotton/Maize)</option>
+        <option value="kalwan">कळवण (Kalwan)</option>
+      </select>
+    </div>
+
+    <!-- Chart 1: Area-Wise Disease Incidence -->
+    <div style="background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:14px; box-shadow:0 4px 14px -8px rgba(0,0,0,0.1);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <b style="font-size:13px; color:var(--forest);" id="chartTitleArea">📊 तालुकावार पीक रोग प्रादुर्भाव (Area Disease Graph)</b>
+        <span style="font-size:10px; font-weight:700; background:#EAF5EE; color:var(--leaf); padding:2px 6px; border-radius:6px;">LIVE KVK</span>
+      </div>
+      <div style="position:relative; height:210px; width:100%;">
+        <canvas id="canvasKvkArea"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Community Risk Tiers Donut -->
+    <div style="background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:14px; box-shadow:0 4px 14px -8px rgba(0,0,0,0.1);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <b style="font-size:13px; color:var(--forest);" id="chartTitleRisk">🎯 जोखीम श्रेणी विभाजन (Risk Tiers)</b>
+        <span style="font-size:10px; font-weight:700; background:#FEF3E2; color:var(--turmeric-deep); padding:2px 6px; border-radius:6px;">1.5km GRID</span>
+      </div>
+      <div style="position:relative; height:190px; width:100%;">
+        <canvas id="canvasKvkRisk"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 3: 7-Day Trend vs Outbreak Threshold Line Chart -->
+    <div style="background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:14px; box-shadow:0 4px 14px -8px rgba(0,0,0,0.1);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <b style="font-size:13px; color:var(--forest);" id="chartTitleTrend">📈 ७-दिवसीय कल विरूद्ध धोका मर्यादा (Trend vs Threshold)</b>
+        <span style="font-size:10px; font-weight:700; background:#FCEBE6; color:var(--red); padding:2px 6px; border-radius:6px;">THRESHOLD = 18</span>
+      </div>
+      <div style="position:relative; height:180px; width:100%;">
+        <canvas id="canvasKvkTrend"></canvas>
+      </div>
+    </div>
+
+    <!-- Triage Verification Queue Section -->
+    <div class="section-title" style="margin-top:18px; margin-bottom:10px;">
+      <span style="font-size:18px;">🧑‍🌾</span>
+      <span id="triageSectionTitle">सत्यापन व ट्राइएज कतार (Human-in-the-Loop Triage)</span>
+    </div>
     <div id="expertList"></div>
-    <div class="pill-note">This dashboard protects farmers from false-alert fatigue. Trigger alerts and add them directly to the map by confirming cases.</div>
+    <div class="pill-note" id="expertPillNote">This dashboard protects farmers from false-alert fatigue. Confirming cases validates AI diagnoses and updates the community risk map.</div>
   </div>
 
   <!-- ============ SETTINGS MODAL ============ -->
@@ -767,6 +864,18 @@ const STR = {
     expertToastVerified: "✅ सत्यापित — गाँव के किसानों को अलर्ट भेजा गया",
     expertToastRejected: "केस अस्वीकृत — कोई अलर्ट नहीं भेजा जाएगा",
     expertToastEdit: "सलाह संपादन खुला (विशेषज्ञ सुझाव बदल सकते हैं)",
+
+    // Visualised KVK Dashboard Keys
+    btnOpenFullKvk: "🖥️ पूर्ण KVK कमांड सेंटर खोलें (Full Desktop Portal) ➔",
+    kpiTotalReportsTitle: "कुल किसान रिपोर्ट",
+    kpiHotspotsTitle: "सक्रिय हॉटस्पॉट",
+    kpiPendingTitle: "लंबित सत्यापन",
+    kpiBroadcastTitle: "सत्यापित अलर्ट",
+    chartTitleArea: "📊 तालुकावार फसल रोग प्रकोप (Area-Wise Disease Incidence)",
+    chartTitleRisk: "🎯 जोखिम श्रेणी विभाजन (Community Risk Tiers)",
+    chartTitleTrend: "📈 7-दिवसीय रुझान बनाम प्रकोप सीमा (Trend vs Threshold)",
+    triageSectionTitle: "🧑‍🌾 सत्यापन एवं ट्राइएज कतार (Human-in-the-Loop Triage)",
+    lblTalukaSelect: "तालुका / क्षेत्र चुनें:",
     
     toastSaved: "⚙️ API कॉन्फिगरेशन सहेजा गया",
     toastOffline: "Offline mode · showing cached data · sync when online"
@@ -887,6 +996,18 @@ const STR = {
     expertToastVerified: "✅ पडताळणी पूर्ण — गावातील शेतकऱ्यांना अलर्ट पाठवला आहे",
     expertToastRejected: "केस नाकारली — कोणताही अलर्ट पाठवला जाणार नाही",
     expertToastEdit: "सल्ला संपादन सुरू (तज्ज्ञ सूचना बदलू शकतात)",
+
+    // Visualised KVK Dashboard Keys
+    btnOpenFullKvk: "🖥️ पूर्ण KVK कमान केंद्र उघडा (Full Desktop Portal) ➔",
+    kpiTotalReportsTitle: "एकूण शेतकरी अहवाल",
+    kpiHotspotsTitle: "सक्रिय हॉटस्पॉट्स",
+    kpiPendingTitle: "प्रलंबित पडताळणी",
+    kpiBroadcastTitle: "प्रसारित अलर्ट्स",
+    chartTitleArea: "📊 तालुकावार पीक रोग प्रादुर्भाव (Area-Wise Disease Incidence)",
+    chartTitleRisk: "🎯 जोखीम श्रेणी विभाजन (Community Risk Tiers)",
+    chartTitleTrend: "📈 ७-दिवसीय कल विरूद्ध धोका मर्यादा (Trend vs Threshold)",
+    triageSectionTitle: "🧑‍🌾 पडताळणी आणि ट्राइएज रांग (Human-in-the-Loop Triage)",
+    lblTalukaSelect: "तालुका / क्षेत्र निवडा:",
     
     toastSaved: "⚙️ API कॉन्फिगरेशन यशस्वीरित्या जतन केले",
     toastOffline: "Offline mode · showing cached data · sync when online"
@@ -1007,6 +1128,18 @@ const STR = {
     expertToastVerified: "✅ Verified — alert sent to village farmers",
     expertToastRejected: "Case rejected — no alert will be broadcast",
     expertToastEdit: "Advice editing opened (expert can edit suggestions)",
+
+    // Visualised KVK Dashboard Keys
+    btnOpenFullKvk: "🖥️ Open Full KVK Command Center (Desktop Portal) ➔",
+    kpiTotalReportsTitle: "Total Field Reports",
+    kpiHotspotsTitle: "Active Hotspots",
+    kpiPendingTitle: "Pending Triage",
+    kpiBroadcastTitle: "Broadcast Alerts",
+    chartTitleArea: "📊 Area-Wise Crop Disease Incidence",
+    chartTitleRisk: "🎯 Community Risk Tiers Breakdown",
+    chartTitleTrend: "📈 7-Day Trend vs Outbreak Threshold",
+    triageSectionTitle: "🧑‍🌾 Human-in-the-Loop Verification Queue",
+    lblTalukaSelect: "Select Taluka / Area:",
     
     toastSaved: "⚙️ API Configuration saved successfully",
     toastOffline: "Offline mode · showing cached data · sync when online"
@@ -1085,6 +1218,7 @@ function goTo(name){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===name));
   window.scrollTo({top:0, behavior:'smooth'});
   if(name==='map') setTimeout(()=>{ if(window._map) window._map.invalidateSize(); }, 150);
+  if(name==='expert') setTimeout(()=>{ if(typeof initKvkCharts === 'function') initKvkCharts(); }, 150);
 }
 
 function toast(msg, ms=2600){
@@ -1205,6 +1339,17 @@ function updateUILanguage() {
   // Expert Screen
   document.getElementById('expertTitle').textContent = STR[lang].expertTitle;
   document.getElementById('expertSub').textContent = STR[lang].expertSub;
+  if (document.getElementById('btnOpenFullKvk')) document.getElementById('btnOpenFullKvk').textContent = STR[lang].btnOpenFullKvk;
+  if (document.getElementById('kpiTotalReportsTitle')) document.getElementById('kpiTotalReportsTitle').textContent = STR[lang].kpiTotalReportsTitle;
+  if (document.getElementById('kpiHotspotsTitle')) document.getElementById('kpiHotspotsTitle').textContent = STR[lang].kpiHotspotsTitle;
+  if (document.getElementById('kpiPendingTitle')) document.getElementById('kpiPendingTitle').textContent = STR[lang].kpiPendingTitle;
+  if (document.getElementById('kpiBroadcastTitle')) document.getElementById('kpiBroadcastTitle').textContent = STR[lang].kpiBroadcastTitle;
+  if (document.getElementById('chartTitleArea')) document.getElementById('chartTitleArea').textContent = STR[lang].chartTitleArea;
+  if (document.getElementById('chartTitleRisk')) document.getElementById('chartTitleRisk').textContent = STR[lang].chartTitleRisk;
+  if (document.getElementById('chartTitleTrend')) document.getElementById('chartTitleTrend').textContent = STR[lang].chartTitleTrend;
+  if (document.getElementById('triageSectionTitle')) document.getElementById('triageSectionTitle').textContent = STR[lang].triageSectionTitle;
+  if (document.getElementById('lblTalukaSelect')) document.getElementById('lblTalukaSelect').textContent = STR[lang].lblTalukaSelect;
+  if (typeof updateKvkChartLabels === 'function') updateKvkChartLabels();
 
   // Dynamic UI re-renderers
   updateNet();
@@ -2765,9 +2910,202 @@ function renderExpertCases(){
       }
     });
   });
+  // Update KPI counters on visualised dashboard
+  const pendingCount = expertCases.filter(c => c.status === 'pending').length;
+  const verifiedCount = expertCases.filter(c => c.status === 'verified').length;
+  const reportsEl = document.getElementById('kpiValReports');
+  const pendingEl = document.getElementById('kpiValPending');
+  const broadcastEl = document.getElementById('kpiValBroadcast');
+  if (reportsEl) reportsEl.textContent = 145 + expertCases.length;
+  if (pendingEl) pendingEl.textContent = pendingCount;
+  if (broadcastEl) broadcastEl.textContent = 12 + verifiedCount;
 }
 
-window.addEventListener('load', loadExpertCases);
+/* ================= Visualised KVK Dashboard Charts ================= */
+let kvkAreaChart = null;
+let kvkRiskChart = null;
+let kvkTrendChart = null;
+
+function initKvkCharts() {
+  if (typeof Chart === 'undefined') return;
+
+  const canvasArea = document.getElementById('canvasKvkArea');
+  const canvasRisk = document.getElementById('canvasKvkRisk');
+  const canvasTrend = document.getElementById('canvasKvkTrend');
+
+  if (canvasArea && !kvkAreaChart) {
+    const ctxArea = canvasArea.getContext('2d');
+    kvkAreaChart = new Chart(ctxArea, {
+      type: 'bar',
+      data: {
+        labels: lang === 'en' 
+          ? ['Niphad', 'Sinnar', 'Nashik', 'Dindori', 'Yeola', 'Kalwan']
+          : (lang === 'mr' ? ['निफाड', 'सिन्नर', 'नाशिक', 'दिंडोरी', 'येवला', 'कळवण'] : ['निफाड़', 'सिन्नर', 'नासिक', 'दिंडोरी', 'येवला', 'कलवण']),
+        datasets: [
+          {
+            label: lang === 'en' ? 'Late Blight' : (lang === 'mr' ? 'करपा' : 'झुलसा रोग'),
+            data: [28, 34, 19, 14, 6, 4],
+            backgroundColor: '#C1440E',
+            borderRadius: 5
+          },
+          {
+            label: lang === 'en' ? 'Stem Borer' : (lang === 'mr' ? 'खोडकिडा' : 'तना छेदक'),
+            data: [15, 12, 18, 8, 22, 9],
+            backgroundColor: '#D97A2B',
+            borderRadius: 5
+          },
+          {
+            label: lang === 'en' ? 'Powdery Mildew' : (lang === 'mr' ? 'भुरी' : 'चूर्णिल आसिता'),
+            data: [24, 8, 11, 26, 7, 5],
+            backgroundColor: '#E8A33D',
+            borderRadius: 5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } },
+          tooltip: { padding: 8, cornerRadius: 8 }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+          y: { beginAtZero: true, grid: { color: '#F0EADB' }, ticks: { font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  if (canvasRisk && !kvkRiskChart) {
+    const ctxRisk = canvasRisk.getContext('2d');
+    kvkRiskChart = new Chart(ctxRisk, {
+      type: 'doughnut',
+      data: {
+        labels: lang === 'en'
+          ? ['Red (Verified)', 'Orange (Cluster)', 'Yellow (Monitor)', 'Green (Normal)']
+          : (lang === 'mr' ? ['लाल (सत्यापित)', 'नारंगी (क्लस्टर)', 'पिवळा (देखरेख)', 'हिरवा (सामान्य)'] : ['लाल (सत्यापित)', 'नारंगी (क्लस्टर)', 'पीला (निगरानी)', 'हरा (सामान्य)']),
+        datasets: [{
+          data: [18, 32, 36, 14],
+          backgroundColor: ['#C1440E', '#D97A2B', '#E8A33D', '#3F7D58'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+        },
+        cutout: '66%'
+      }
+    });
+  }
+
+  if (canvasTrend && !kvkTrendChart) {
+    const ctxTrend = canvasTrend.getContext('2d');
+    kvkTrendChart = new Chart(ctxTrend, {
+      type: 'line',
+      data: {
+        labels: lang === 'en'
+          ? ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Yesterday', 'Today']
+          : (lang === 'mr' ? ['६ दि पूर्वी', '५ दि', '४ दि', '३ दि', '२ दि', 'काल', 'आज'] : ['6 दिन पूर्व', '5 दिन', '4 दिन', '3 दिन', '2 दिन', 'कल', 'आज']),
+        datasets: [
+          {
+            label: lang === 'en' ? 'Incident Trend' : (lang === 'mr' ? 'रोग कल' : 'रोग रुझान'),
+            data: [9, 12, 14, 19, 23, 26, 28],
+            borderColor: '#C1440E',
+            backgroundColor: 'rgba(193, 68, 14, 0.12)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointBackgroundColor: '#C1440E'
+          },
+          {
+            label: lang === 'en' ? 'Threat Threshold (18)' : (lang === 'mr' ? 'धोका मर्यादा (१८)' : 'खतरा सीमा (18)'),
+            data: [18, 18, 18, 18, 18, 18, 18],
+            borderColor: '#241F16',
+            borderDash: [5, 5],
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+          y: { beginAtZero: true, grid: { color: '#F0EADB' }, ticks: { font: { size: 10 } } }
+        }
+      }
+    });
+  }
+}
+
+function onKvkTalukaChange(taluka) {
+  if (!kvkAreaChart) return;
+  if (taluka === 'all') {
+    kvkAreaChart.data.datasets[0].data = [28, 34, 19, 14, 6, 4];
+    kvkAreaChart.data.datasets[1].data = [15, 12, 18, 8, 22, 9];
+    kvkAreaChart.data.datasets[2].data = [24, 8, 11, 26, 7, 5];
+  } else if (taluka === 'niphad') {
+    kvkAreaChart.data.datasets[0].data = [28, 4, 3, 2, 1, 1];
+    kvkAreaChart.data.datasets[1].data = [15, 2, 2, 1, 3, 2];
+    kvkAreaChart.data.datasets[2].data = [24, 1, 2, 3, 1, 1];
+  } else if (taluka === 'sinnar') {
+    kvkAreaChart.data.datasets[0].data = [3, 34, 4, 2, 1, 1];
+    kvkAreaChart.data.datasets[1].data = [2, 12, 3, 1, 2, 1];
+    kvkAreaChart.data.datasets[2].data = [2, 8, 2, 3, 1, 1];
+  } else if (taluka === 'nashik') {
+    kvkAreaChart.data.datasets[0].data = [2, 3, 19, 2, 1, 1];
+    kvkAreaChart.data.datasets[1].data = [1, 2, 18, 2, 3, 2];
+    kvkAreaChart.data.datasets[2].data = [1, 1, 11, 3, 1, 1];
+  } else {
+    kvkAreaChart.data.datasets[0].data = [8, 10, 6, 14, 6, 4];
+    kvkAreaChart.data.datasets[1].data = [4, 5, 6, 8, 22, 9];
+    kvkAreaChart.data.datasets[2].data = [6, 4, 3, 26, 7, 5];
+  }
+  kvkAreaChart.update();
+  toast(lang === 'en' ? `📍 Area filtered: ${taluka.toUpperCase()}` : (lang === 'mr' ? `📍 तालुका फिल्टर: ${taluka.toUpperCase()}` : `📍 क्षेत्र फ़िल्टर: ${taluka.toUpperCase()}`));
+}
+
+function updateKvkChartLabels() {
+  if (kvkAreaChart) {
+    kvkAreaChart.data.labels = lang === 'en' 
+      ? ['Niphad', 'Sinnar', 'Nashik', 'Dindori', 'Yeola', 'Kalwan']
+      : (lang === 'mr' ? ['निफाड', 'सिन्नर', 'नाशिक', 'दिंडोरी', 'येवला', 'कळवण'] : ['निफाड़', 'सिन्नर', 'नासिक', 'दिंडोरी', 'येवला', 'कलवण']);
+    kvkAreaChart.data.datasets[0].label = lang === 'en' ? 'Late Blight' : (lang === 'mr' ? 'करपा' : 'झुलसा रोग');
+    kvkAreaChart.data.datasets[1].label = lang === 'en' ? 'Stem Borer' : (lang === 'mr' ? 'खोडकिडा' : 'तना छेदक');
+    kvkAreaChart.data.datasets[2].label = lang === 'en' ? 'Powdery Mildew' : (lang === 'mr' ? 'भुरी' : 'चूर्णिल आसिता');
+    kvkAreaChart.update();
+  }
+  if (kvkRiskChart) {
+    kvkRiskChart.data.labels = lang === 'en'
+      ? ['Red (Verified)', 'Orange (Cluster)', 'Yellow (Monitor)', 'Green (Normal)']
+      : (lang === 'mr' ? ['लाल (सत्यापित)', 'नारंगी (क्लस्टर)', 'पिवळा (देखरेख)', 'हिरवा (सामान्य)'] : ['लाल (सत्यापित)', 'नारंगी (क्लस्टर)', 'पीला (निगरानी)', 'हरा (सामान्य)']);
+    kvkRiskChart.update();
+  }
+  if (kvkTrendChart) {
+    kvkTrendChart.data.labels = lang === 'en'
+      ? ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Yesterday', 'Today']
+      : (lang === 'mr' ? ['६ दि पूर्वी', '५ दि', '४ दि', '३ दि', '२ दि', 'काल', 'आज'] : ['6 दिन पूर्व', '5 दिन', '4 दिन', '3 दिन', '2 दिन', 'कल', 'आज']);
+    kvkTrendChart.data.datasets[0].label = lang === 'en' ? 'Incident Trend' : (lang === 'mr' ? 'रोग कल' : 'रोग रुझान');
+    kvkTrendChart.data.datasets[1].label = lang === 'en' ? 'Threat Threshold (18)' : (lang === 'mr' ? 'धोका मर्यादा (१८)' : 'खतरा सीमा (18)');
+    kvkTrendChart.update();
+  }
+}
+
+window.addEventListener('load', () => {
+  loadExpertCases();
+  setTimeout(initKvkCharts, 400);
+});
 
 if('speechSynthesis' in window){
   window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.getVoices(); };
