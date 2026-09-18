@@ -1,7 +1,8 @@
-const CACHE = "prayas-ai-v2";
+const CACHE = "prayas-ai-v3";
 const ASSETS = [
   "./",
   "./index.html",
+  "./expert.html",
   "./manifest.json",
   "./icons/icon.svg"
 ];
@@ -22,7 +23,7 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
-// Network-first for static map tiles, cache-first for PWA app shell, network-only bypass for /api/ and POST requests
+// Network-first for HTML/navigation requests, bypass for API, cache fallback for offline
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
 
@@ -32,16 +33,38 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  const isShell = ASSETS.some((a) => e.request.url.endsWith(a.replace("./", "")));
+  // Network-first policy for HTML pages and app shell so users always see the latest deployed updates online
+  const isHtml = e.request.mode === "navigate" ||
+                 e.request.destination === "document" ||
+                 url.pathname.endsWith(".html") ||
+                 url.pathname === "/" ||
+                 url.pathname.endsWith("/expert") ||
+                 url.pathname.endsWith("/kavk");
 
-  if (isShell) {
+  if (isHtml) {
     e.respondWith(
-      caches.match(e.request).then((cached) => cached || fetch(e.request))
+      fetch(e.request)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const resClone = res.clone();
+            caches.open(CACHE).then((cache) => cache.put(e.request, resClone)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => {
+          return caches.match(e.request).then((cached) => {
+            if (cached) return cached;
+            if (url.pathname.includes("expert") || url.pathname.includes("kavk")) {
+              return caches.match("./expert.html");
+            }
+            return caches.match("./index.html");
+          });
+        })
     );
     return;
   }
 
-  // Network-first policy for Leaflet map tiles and other third-party GET assets
+  // Network-first with cache fallback for static assets
   e.respondWith(
     fetch(e.request)
       .then((res) => {
